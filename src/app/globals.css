@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply text-ink antialiased;
+  }
+}
+
+@layer utilities {
+  .shadow-card {
+    box-shadow: 0 2px 12px 0 rgba(21, 29, 51, 0.08);
+  }
+  .shadow-card-hover {
+    box-shadow: 0 4px 24px 0 rgba(21, 29, 51, 0.14);
+  }
+}
