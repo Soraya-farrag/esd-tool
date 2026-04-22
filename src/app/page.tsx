@@ -291,7 +291,7 @@ export default function ESDApp() {
                       )}
                       {!label && (
                         <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-ink-50/50 flex items-center justify-center text-ink/20 text-lg">
-                          {selectionStep === 'most' ? '?' : selectionStep === 'least' ? '?' : ''}
+                          {selectionStep === 'most' ? '○' : selectionStep === 'least' ? '○' : ''}
                         </div>
                       )}
                       <p className="text-sm text-ink leading-relaxed flex-1">{stmt.text[lang]}</p>
