@@ -134,7 +134,7 @@ function computeSubScore(
   }
 
   const range = tMax - tMin
-  if (range === 0) return 50
+  if (range === 0) continue 50
   return Math.max(0, Math.min(100,
     Math.round(100 * (raw - tMin) / range * 10) / 10
   ))
@@ -209,7 +209,7 @@ export function computeTraitScores(
         else { tMax += alloc * 0.0; tMin += alloc * (-1.0) }
       }
       const range = tMax - tMin
-      if (range === 0) return
+      if (range === 0) continue
       contributions.push(Math.max(0, Math.min(100, 100 * (raw - tMin) / range)))
     }
     const avg = contributions.length > 0
