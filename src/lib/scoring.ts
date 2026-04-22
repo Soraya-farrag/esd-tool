@@ -134,7 +134,7 @@ function computeSubScore(
   }
 
   const range = tMax - tMin
-  if (range === 0) continue
+  if (range === 0) return 50
   return Math.max(0, Math.min(100,
     Math.round(100 * (raw - tMin) / range * 10) / 10
   ))
