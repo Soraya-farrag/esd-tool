@@ -48,15 +48,147 @@ function getRankLabel(pos: number, t: ReturnType<typeof useT>): string {
   return t.leastLike
 }
 
-function getRankColor(pos: number): { bg: string; text: string; border: string } {
+function getRankColor(pos: number): { bg: string; text: string; border: string; badge: string } {
   const colors = [
-    { bg: 'bg-teal/10', text: 'text-teal', border: 'border-teal' },        // 1st - teal
-    { bg: 'bg-teal/5', text: 'text-teal/70', border: 'border-teal/40' },   // 2nd
-    { bg: 'bg-gray-50', text: 'text-ink/40', border: 'border-gray-200' },   // 3rd - neutral
-    { bg: 'bg-purple-50/50', text: 'text-purple/60', border: 'border-purple/30' }, // 4th
-    { bg: 'bg-purple-50', text: 'text-purple', border: 'border-purple/50' }, // 5th - purple
+    { bg: 'bg-teal-50/60', text: 'text-teal', border: 'border-teal/40', badge: 'bg-teal text-white' },
+    { bg: 'bg-teal-50/30', text: 'text-teal/70', border: 'border-teal/20', badge: 'bg-teal/20 text-teal' },
+    { bg: 'bg-gray-50/50', text: 'text-ink/40', border: 'border-gray-200', badge: 'bg-gray-100 text-ink/40' },
+    { bg: 'bg-purple-50/30', text: 'text-purple/60', border: 'border-purple/20', badge: 'bg-purple/15 text-purple/60' },
+    { bg: 'bg-purple-50/60', text: 'text-purple', border: 'border-purple/40', badge: 'bg-purple text-white' },
   ]
   return colors[pos] ?? colors[2]
+}
+
+// ── Drag-and-Drop Ranking Component ──
+function DragRankCards({
+  rankedIds,
+  statements,
+  lang,
+  t,
+  onReorder,
+}: {
+  rankedIds: string[]
+  statements: { id: string; text: Record<string, string> }[]
+  lang: Lang
+  t: ReturnType<typeof useT>
+  onReorder: (newOrder: string[]) => void
+}) {
+  const [dragIdx, setDragIdx] = useState<number | null>(null)
+  const [overIdx, setOverIdx] = useState<number | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([])
+  const startY = useRef(0)
+  const isDragging = useRef(false)
+
+  const handlePointerDown = (idx: number, e: React.PointerEvent) => {
+    e.preventDefault()
+    isDragging.current = true
+    setDragIdx(idx)
+    setOverIdx(idx)
+    startY.current = e.clientY
+    ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
+  }
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging.current || dragIdx === null) return
+    e.preventDefault()
+
+    // Determine which card slot the pointer is over
+    const container = containerRef.current
+    if (!container) return
+
+    const cards = cardRefs.current
+    let newOver = dragIdx
+    for (let i = 0; i < cards.length; i++) {
+      const card = cards[i]
+      if (!card) continue
+      const rect = card.getBoundingClientRect()
+      const midY = rect.top + rect.height / 2
+      if (e.clientY < midY) {
+        newOver = i
+        break
+      }
+      newOver = i + 1
+    }
+    newOver = Math.max(0, Math.min(rankedIds.length - 1, newOver))
+    setOverIdx(newOver)
+  }
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!isDragging.current || dragIdx === null || overIdx === null) {
+      isDragging.current = false
+      setDragIdx(null)
+      setOverIdx(null)
+      return
+    }
+
+    isDragging.current = false
+
+    if (dragIdx !== overIdx) {
+      const newOrder = [...rankedIds]
+      const [removed] = newOrder.splice(dragIdx, 1)
+      newOrder.splice(overIdx, 0, removed)
+      onReorder(newOrder)
+    }
+
+    setDragIdx(null)
+    setOverIdx(null)
+  }
+
+  // Compute visual order for rendering
+  const visualOrder = [...rankedIds]
+  if (dragIdx !== null && overIdx !== null && dragIdx !== overIdx) {
+    const [removed] = visualOrder.splice(dragIdx, 1)
+    visualOrder.splice(overIdx, 0, removed)
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      className="space-y-2"
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      style={{ touchAction: 'none' }}
+    >
+      {visualOrder.map((stmtId, pos) => {
+        const stmt = statements.find(s => s.id === stmtId)
+        if (!stmt) return null
+        const rc = getRankColor(pos)
+        const label = getRankLabel(pos, t)
+        const isBeingDragged = dragIdx !== null && rankedIds[dragIdx] === stmtId
+
+        return (
+          <div
+            key={stmtId}
+            ref={(el) => { cardRefs.current[pos] = el }}
+            onPointerDown={(e) => handlePointerDown(rankedIds.indexOf(stmtId), e)}
+            className={`rounded-xl border-2 ${rc.border} ${rc.bg} p-4 select-none transition-all duration-150
+              ${isBeingDragged ? 'shadow-lg scale-[1.02] ring-2 ring-purple/30 z-10 relative' : 'cursor-grab active:cursor-grabbing'}
+            `}
+          >
+            <div className="flex items-start gap-3">
+              {/* Drag handle + rank badge */}
+              <div className="flex-shrink-0 flex flex-col items-center gap-1">
+                <div className="text-ink/20 text-xs select-none">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <circle cx="5" cy="3" r="1.5"/><circle cx="11" cy="3" r="1.5"/>
+                    <circle cx="5" cy="8" r="1.5"/><circle cx="11" cy="8" r="1.5"/>
+                    <circle cx="5" cy="13" r="1.5"/><circle cx="11" cy="13" r="1.5"/>
+                  </svg>
+                </div>
+                <span className={`inline-block px-2 py-0.5 rounded-md text-xs font-bold ${rc.badge}`}>
+                  {label}
+                </span>
+              </div>
+
+              {/* Statement text */}
+              <p className="text-sm text-ink leading-relaxed flex-1">{stmt.text[lang]}</p>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
 }
 
 // ── Main App ──
@@ -69,7 +201,7 @@ export default function ESDApp() {
   const [reportText, setReportText] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
 
-  // ── Drag-and-drop state ──
+  // Ranking state
   const [rankedIds, setRankedIds] = useState<string[]>([])
   const [contextText, setContextText] = useState('')
 
@@ -87,20 +219,10 @@ export default function ESDApp() {
       setRankedIds(sorted.map(s => s.statementId))
       setContextText(existing.contextExample)
     } else {
-      // Default order: as displayed
       setRankedIds(currentQuestion.statements.map(s => s.id))
       setContextText('')
     }
   }, [questionIndex, currentQuestion, responses])
-
-  // Move card up/down
-  const moveCard = (index: number, direction: -1 | 1) => {
-    const newIndex = index + direction
-    if (newIndex < 0 || newIndex >= rankedIds.length) return
-    const newOrder = [...rankedIds]
-    ;[newOrder[index], newOrder[newIndex]] = [newOrder[newIndex], newOrder[index]]
-    setRankedIds(newOrder)
-  }
 
   // Build response
   const buildResponse = useCallback((): QuestionResponse | null => {
@@ -260,48 +382,14 @@ export default function ESDApp() {
               <p className="text-xs text-ink/40">{t.rankHint}</p>
             </div>
 
-            {/* Ranked statement cards */}
-            <div className="space-y-2">
-              {rankedIds.map((stmtId, pos) => {
-                const stmt = currentQuestion.statements.find(s => s.id === stmtId)
-                if (!stmt) return null
-                const rc = getRankColor(pos)
-                const label = getRankLabel(pos, t)
-
-                return (
-                  <div key={stmtId}
-                    className={`rounded-xl border-2 ${rc.border} ${rc.bg} p-4 transition-all duration-200`}>
-                    <div className="flex items-start gap-3">
-                      {/* Rank badge */}
-                      <div className={`flex-shrink-0 w-16 text-center`}>
-                        <span className={`inline-block px-2 py-1 rounded-lg text-xs font-bold ${rc.text} ${rc.bg}`}>
-                          {label}
-                        </span>
-                      </div>
-
-                      {/* Statement text */}
-                      <p className="text-sm text-ink leading-relaxed flex-1">{stmt.text[lang]}</p>
-
-                      {/* Up/Down arrows */}
-                      <div className="flex flex-col gap-1 flex-shrink-0">
-                        <button
-                          onClick={() => moveCard(pos, -1)}
-                          disabled={pos === 0}
-                          className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-ink/40 hover:text-ink hover:border-ink/30 disabled:opacity-20 disabled:cursor-not-allowed transition">
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2L10 7H2L6 2Z" fill="currentColor"/></svg>
-                        </button>
-                        <button
-                          onClick={() => moveCard(pos, 1)}
-                          disabled={pos === rankedIds.length - 1}
-                          className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-ink/40 hover:text-ink hover:border-ink/30 disabled:opacity-20 disabled:cursor-not-allowed transition">
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 10L2 5H10L6 10Z" fill="currentColor"/></svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
+            {/* Drag-and-drop cards */}
+            <DragRankCards
+              rankedIds={rankedIds}
+              statements={currentQuestion.statements}
+              lang={lang}
+              t={t}
+              onReorder={setRankedIds}
+            />
 
             {/* Contextual intelligence textbox */}
             <div className="space-y-3 pt-2">
@@ -350,45 +438,54 @@ export default function ESDApp() {
               <p className="text-sm text-ink/60 leading-relaxed max-w-xl mx-auto">{getOrbInterpretation()}</p>
             </div>
 
-            {/* Executive Summary */}
+            {/* Executive Summary with explanations */}
             <div className="rounded-2xl border border-gray-200 bg-white shadow-card overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-100">
                 <h2 className="text-xs font-semibold text-ink/40 uppercase tracking-widest">{t.executiveSummary}</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
                 {/* Strengths */}
-                <div className="p-6 space-y-2">
-                  <p className="text-xs font-semibold text-teal uppercase tracking-wide flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-teal/10 flex items-center justify-center text-teal text-xs">{'\u2713'}</span>
-                    {t.strengths}
-                  </p>
+                <div className="p-6 space-y-3">
+                  <div>
+                    <p className="text-xs font-semibold text-teal uppercase tracking-wide flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-full bg-teal/10 flex items-center justify-center text-teal text-xs">{'\u2713'}</span>
+                      {t.strengths}
+                    </p>
+                    <p className="text-xs text-ink/35 mt-1.5 leading-relaxed">{t.strengthsExplain}</p>
+                  </div>
                   {getStrengths().length > 0 ? (
                     <ul className="space-y-1">{getStrengths().map((s, i) => (
-                      <li key={i} className="text-sm text-ink">{s}</li>
+                      <li key={i} className="text-sm text-ink font-medium">{s}</li>
                     ))}</ul>
-                  ) : <p className="text-sm text-ink/40">{t.noStrengths}</p>}
+                  ) : <p className="text-sm text-ink/40 italic">{t.noStrengths}</p>}
                 </div>
                 {/* Priority gaps */}
-                <div className="p-6 space-y-2">
-                  <p className="text-xs font-semibold text-orange uppercase tracking-wide flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-orange/10 flex items-center justify-center text-orange text-xs">{'\u26a0'}</span>
-                    {t.priorityGaps}
-                  </p>
+                <div className="p-6 space-y-3">
+                  <div>
+                    <p className="text-xs font-semibold text-orange uppercase tracking-wide flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-full bg-orange/10 flex items-center justify-center text-orange text-xs">{'\u26a0'}</span>
+                      {t.priorityGaps}
+                    </p>
+                    <p className="text-xs text-ink/35 mt-1.5 leading-relaxed">{t.priorityGapsExplain}</p>
+                  </div>
                   {getGaps().length > 0 ? (
                     <ul className="space-y-1">{getGaps().map((s, i) => (
-                      <li key={i} className="text-sm text-ink">{s}</li>
+                      <li key={i} className="text-sm text-ink font-medium">{s}</li>
                     ))}</ul>
-                  ) : <p className="text-sm text-ink/40">{t.noGaps}</p>}
+                  ) : <p className="text-sm text-ink/40 italic">{t.noGaps}</p>}
                 </div>
                 {/* Primary tension */}
-                <div className="p-6 space-y-2">
-                  <p className="text-xs font-semibold text-purple uppercase tracking-wide flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-purple/10 flex items-center justify-center text-purple text-xs">{'\u2192'}</span>
-                    {t.primaryTension}
-                  </p>
+                <div className="p-6 space-y-3">
+                  <div>
+                    <p className="text-xs font-semibold text-purple uppercase tracking-wide flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-full bg-purple/10 flex items-center justify-center text-purple text-xs">{'\u2192'}</span>
+                      {t.primaryTension}
+                    </p>
+                    <p className="text-xs text-ink/35 mt-1.5 leading-relaxed">{t.primaryTensionExplain}</p>
+                  </div>
                   {results.firedPatterns.length > 0 ? (
-                    <p className="text-sm text-ink">{PATTERNS[results.firedPatterns[0].patternId]?.name[lang]}</p>
-                  ) : <p className="text-sm text-ink/40">{t.noTensions}</p>}
+                    <p className="text-sm text-ink font-medium">{PATTERNS[results.firedPatterns[0].patternId]?.name[lang]}</p>
+                  ) : <p className="text-sm text-ink/40 italic">{t.noTensions}</p>}
                 </div>
               </div>
             </div>
@@ -400,7 +497,6 @@ export default function ESDApp() {
                 {results.dimensionScores.map(ds => {
                   const dim = DIMENSIONS.find(d => d.id === ds.dimensionId)
                   if (!dim) return null
-                  const orbText = ORB_BANDS[ds.band]?.interpretation?.[lang] ?? ''
                   return (
                     <div key={ds.dimensionId} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-card transition">
                       <div className="flex items-start justify-between mb-3">
@@ -426,7 +522,7 @@ export default function ESDApp() {
                         </div>
                       )}
                       {ds.varianceFlag === 'High Variance' && (
-                        <p className="text-xs text-orange font-medium mb-1">{t.highVariance}</p>
+                        <p className="text-xs text-orange font-medium">{t.highVariance}</p>
                       )}
                     </div>
                   )
@@ -464,13 +560,12 @@ export default function ESDApp() {
 
             {/* Patterns & Failure Modes — with explanations */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Patterns */}
               <div className="rounded-2xl border border-gray-200 bg-white shadow-card overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100">
                   <h2 className="text-xs font-semibold text-ink/40 uppercase tracking-widest">{t.patternsDetected}</h2>
                 </div>
                 <div className="p-6">
-                  {results.firedPatterns.length === 0 ? <p className="text-sm text-ink/40">{t.noneDetected}</p> : (
+                  {results.firedPatterns.length === 0 ? <p className="text-sm text-ink/40 italic">{t.noneDetected}</p> : (
                     <ul className="space-y-4">{results.firedPatterns.map(p => {
                       const pat = PATTERNS[p.patternId]
                       return (
@@ -483,13 +578,12 @@ export default function ESDApp() {
                   )}
                 </div>
               </div>
-              {/* Failure Modes */}
               <div className="rounded-2xl border border-gray-200 bg-white shadow-card overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100">
                   <h2 className="text-xs font-semibold text-ink/40 uppercase tracking-widest">{t.failureModesTriggered}</h2>
                 </div>
                 <div className="p-6">
-                  {results.firedFailureModes.length === 0 ? <p className="text-sm text-ink/40">{t.noneDetected}</p> : (
+                  {results.firedFailureModes.length === 0 ? <p className="text-sm text-ink/40 italic">{t.noneDetected}</p> : (
                     <ul className="space-y-4">{results.firedFailureModes.map(f => {
                       const fm = FAILURE_MODES[f.failureModeId]
                       return (

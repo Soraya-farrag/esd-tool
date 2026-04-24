@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════
-// ESD v3 — UI Translations (Drag-and-drop ranking, contextual textbox)
+// ESD v4 — UI Translations
 // ═══════════════════════════════════════
 
 export const translations = {
@@ -16,7 +16,6 @@ export const translations = {
     question: 'Question',
     structuralSystem: 'Structural System',
     socialSystem: 'Social System',
-    // Ranking interaction
     rankInstruction: 'Drag the statements into the order that best reflects how your execution system actually works.',
     rankHint: 'Place the most accurate description at the top, and the least accurate at the bottom.',
     mostLike: 'Most like',
@@ -24,7 +23,6 @@ export const translations = {
     rank3: '3rd',
     rank4: '4th',
     leastLike: 'Least like',
-    // Contextual intelligence textbox
     contextLabel: 'Additional context',
     contextHelper: 'Share anything that helps the system understand how execution works in your organisation \u2014 political dynamics, cultural factors, transformation history, or complexity that the statements above may not capture.',
     contextPlaceholder: 'Optional \u2014 but this is where the most valuable diagnostic insights come from...',
@@ -32,13 +30,15 @@ export const translations = {
     seeResults: 'See results \u2192',
     processingTitle: 'Analysing your responses',
     processingSubtitle: 'Computing scores, detecting patterns, and identifying execution risks\u2026',
-    // Results page
     dashboardTitle: 'Your Execution System Diagnostic',
     overallScore: 'Execution Readiness Score',
     executiveSummary: 'Executive Summary',
     strengths: 'Strengths',
+    strengthsExplain: 'The strongest areas of your execution system \u2014 dimensions that currently provide stability, clarity, or execution support.',
     priorityGaps: 'Priority gaps',
+    priorityGapsExplain: 'The dimensions creating the greatest friction or limiting execution effectiveness. These require attention before deployment.',
     primaryTension: 'Primary tension',
+    primaryTensionExplain: 'The dominant structural tension detected across your execution system \u2014 the recurring dynamic most likely to shape execution outcomes.',
     noStrengths: 'No dimensions scored above 60',
     noGaps: 'No critical gaps detected',
     noTensions: 'No structural tensions detected',
@@ -75,7 +75,7 @@ export const translations = {
     question: 'Question',
     structuralSystem: 'Syst\u00e8me Structurel',
     socialSystem: 'Syst\u00e8me Social',
-    rankInstruction: 'Classez les affirmations dans l\u2019ordre qui refl\u00e8te le mieux le fonctionnement r\u00e9el de votre syst\u00e8me d\u2019ex\u00e9cution.',
+    rankInstruction: 'Glissez les affirmations dans l\u2019ordre qui refl\u00e8te le mieux le fonctionnement r\u00e9el de votre syst\u00e8me d\u2019ex\u00e9cution.',
     rankHint: 'Placez la description la plus fid\u00e8le en haut, et la moins fid\u00e8le en bas.',
     mostLike: 'Plus fid\u00e8le',
     rank2: '2e',
@@ -93,8 +93,11 @@ export const translations = {
     overallScore: 'Score de Pr\u00e9paration \u00e0 l\u2019Ex\u00e9cution',
     executiveSummary: 'Synth\u00e8se Ex\u00e9cutive',
     strengths: 'Points forts',
+    strengthsExplain: 'Les dimensions les plus solides de votre syst\u00e8me d\u2019ex\u00e9cution \u2014 celles qui apportent aujourd\u2019hui stabilit\u00e9, clart\u00e9 ou soutien \u00e0 l\u2019ex\u00e9cution.',
     priorityGaps: '\u00c9carts prioritaires',
+    priorityGapsExplain: 'Les dimensions qui cr\u00e9ent le plus de friction ou limitent l\u2019efficacit\u00e9 de l\u2019ex\u00e9cution. Elles n\u00e9cessitent une attention avant le d\u00e9ploiement.',
     primaryTension: 'Tension principale',
+    primaryTensionExplain: 'La tension structurelle dominante d\u00e9tect\u00e9e dans votre syst\u00e8me d\u2019ex\u00e9cution \u2014 la dynamique r\u00e9currente la plus susceptible d\u2019influencer les r\u00e9sultats du d\u00e9ploiement.',
     noStrengths: 'Aucune dimension au-dessus de 60',
     noGaps: 'Aucun \u00e9cart critique d\u00e9tect\u00e9',
     noTensions: 'Aucune tension structurelle d\u00e9tect\u00e9e',
