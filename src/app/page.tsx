@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect, useRef } from 'react'
-import type { Lang, AppStep, QuestionResponse, StatementResponse, DiagnosticResults, Band, DimensionScore } from '@/lib/types'
+import type { Lang, AppStep, QuestionResponse, StatementResponse, DiagnosticResults, Band } from '@/lib/types'
 import { DIMENSIONS, QUESTIONS } from '@/lib/questions'
 import { PATTERNS, FAILURE_MODES, ORB_BANDS } from '@/lib/interpretations'
 import { computeAllScores, getBandColor, getBandLabel } from '@/lib/scoring'
@@ -39,6 +39,26 @@ function BandBadge({ band, lang }: { band: Band; lang: Lang }) {
   )
 }
 
+// ── Rank label + colour ──
+function getRankLabel(pos: number, t: ReturnType<typeof useT>): string {
+  if (pos === 0) return t.mostLike
+  if (pos === 1) return t.rank2
+  if (pos === 2) return t.rank3
+  if (pos === 3) return t.rank4
+  return t.leastLike
+}
+
+function getRankColor(pos: number): { bg: string; text: string; border: string } {
+  const colors = [
+    { bg: 'bg-teal/10', text: 'text-teal', border: 'border-teal' },        // 1st - teal
+    { bg: 'bg-teal/5', text: 'text-teal/70', border: 'border-teal/40' },   // 2nd
+    { bg: 'bg-gray-50', text: 'text-ink/40', border: 'border-gray-200' },   // 3rd - neutral
+    { bg: 'bg-purple-50/50', text: 'text-purple/60', border: 'border-purple/30' }, // 4th
+    { bg: 'bg-purple-50', text: 'text-purple', border: 'border-purple/50' }, // 5th - purple
+  ]
+  return colors[pos] ?? colors[2]
+}
+
 // ── Main App ──
 export default function ESDApp() {
   const [lang, setLang] = useState<Lang>('en')
@@ -49,88 +69,52 @@ export default function ESDApp() {
   const [reportText, setReportText] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
 
-  // ── Option B state ──
-  const [mostId, setMostId] = useState<string | null>(null)
-  const [leastId, setLeastId] = useState<string | null>(null)
-  const [middleOrder, setMiddleOrder] = useState<string[]>([])
+  // ── Drag-and-drop state ──
+  const [rankedIds, setRankedIds] = useState<string[]>([])
   const [contextText, setContextText] = useState('')
-  const [selectionStep, setSelectionStep] = useState<'most' | 'least' | 'done'>('most')
 
   const t = useT(lang)
   const currentQuestion = QUESTIONS[questionIndex]
   const currentDim = currentQuestion ? DIMENSIONS.find(d => d.id === currentQuestion.dimensionId) : null
   const reportRef = useRef<HTMLDivElement>(null)
 
-  // Reset state when question changes
+  // Reset ranking when question changes
   useEffect(() => {
     if (!currentQuestion) return
     const existing = responses.find(r => r.questionId === currentQuestion.id)
     if (existing) {
       const sorted = [...existing.statementResponses].sort((a, b) => a.rankPosition - b.rankPosition)
-      setMostId(sorted[0]?.statementId ?? null)
-      setLeastId(sorted[4]?.statementId ?? null)
-      setMiddleOrder(sorted.slice(1, 4).map(s => s.statementId))
+      setRankedIds(sorted.map(s => s.statementId))
       setContextText(existing.contextExample)
-      setSelectionStep('done')
     } else {
-      setMostId(null)
-      setLeastId(null)
-      setMiddleOrder([])
+      // Default order: as displayed
+      setRankedIds(currentQuestion.statements.map(s => s.id))
       setContextText('')
-      setSelectionStep('most')
     }
   }, [questionIndex, currentQuestion, responses])
 
-  // Handle card click
-  const handleCardClick = (stmtId: string) => {
-    if (selectionStep === 'most') {
-      setMostId(stmtId)
-      setSelectionStep('least')
-    } else if (selectionStep === 'least') {
-      if (stmtId === mostId) return // Can't select same as most
-      setLeastId(stmtId)
-      // Auto-fill middle: remaining 3 in original display order
-      const remaining = currentQuestion.statements
-        .map(s => s.id)
-        .filter(id => id !== mostId && id !== stmtId)
-      setMiddleOrder(remaining)
-      setSelectionStep('done')
-    }
+  // Move card up/down
+  const moveCard = (index: number, direction: -1 | 1) => {
+    const newIndex = index + direction
+    if (newIndex < 0 || newIndex >= rankedIds.length) return
+    const newOrder = [...rankedIds]
+    ;[newOrder[index], newOrder[newIndex]] = [newOrder[newIndex], newOrder[index]]
+    setRankedIds(newOrder)
   }
 
-  // Swap two middle cards
-  const handleMiddleSwap = (idx: number) => {
-    if (idx >= middleOrder.length - 1) return
-    const newOrder = [...middleOrder]
-    ;[newOrder[idx], newOrder[idx + 1]] = [newOrder[idx + 1], newOrder[idx]]
-    setMiddleOrder(newOrder)
-  }
-
-  // Reset selection
-  const handleReset = () => {
-    setMostId(null)
-    setLeastId(null)
-    setMiddleOrder([])
-    setSelectionStep('most')
-  }
-
-  // Build response and save
+  // Build response
   const buildResponse = useCallback((): QuestionResponse | null => {
-    if (!currentQuestion || !mostId || !leastId || middleOrder.length !== 3) return null
-    const statementResponses: StatementResponse[] = [
-      { statementId: mostId, rankPosition: 0 },
-      { statementId: middleOrder[0], rankPosition: 1 },
-      { statementId: middleOrder[1], rankPosition: 2 },
-      { statementId: middleOrder[2], rankPosition: 3 },
-      { statementId: leastId, rankPosition: 4 },
-    ]
+    if (!currentQuestion || rankedIds.length !== 5) return null
+    const statementResponses: StatementResponse[] = rankedIds.map((id, pos) => ({
+      statementId: id,
+      rankPosition: pos,
+    }))
     return { questionId: currentQuestion.id, statementResponses, contextExample: contextText }
-  }, [currentQuestion, mostId, leastId, middleOrder, contextText])
+  }, [currentQuestion, rankedIds, contextText])
 
   const saveAndNext = () => {
     const qr = buildResponse()
     if (!qr) return
-
     const updated = [...responses.filter(r => r.questionId !== currentQuestion.id), qr]
 
     if (questionIndex < QUESTIONS.length - 1) {
@@ -138,7 +122,6 @@ export default function ESDApp() {
       setQuestionIndex(prev => prev + 1)
       window.scrollTo(0, 0)
     } else {
-      // Last question — compute scores
       setStep('processing')
       setTimeout(() => {
         const computed = computeAllScores(QUESTIONS, DIMENSIONS, updated)
@@ -183,23 +166,35 @@ export default function ESDApp() {
     } finally { setIsStreaming(false) }
   }
 
-  const isComplete = selectionStep === 'done'
-
-  // ── Get card styling ──
-  const getCardStyle = (stmtId: string) => {
-    if (stmtId === mostId) return 'border-teal bg-teal-50 ring-2 ring-teal'
-    if (stmtId === leastId) return 'border-rose bg-rose-50 ring-2 ring-rose'
-    if (selectionStep === 'most') return 'border-gray-200 bg-white hover:border-teal/50 hover:bg-teal-50/30 cursor-pointer'
-    if (selectionStep === 'least' && stmtId !== mostId) return 'border-gray-200 bg-white hover:border-rose/50 hover:bg-rose-50/30 cursor-pointer'
-    return 'border-gray-200 bg-white'
+  // ── Helpers for results page ──
+  const getStrengths = () => {
+    if (!results) return []
+    return results.dimensionScores
+      .filter(ds => ds.score >= 61)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3)
+      .map(ds => DIMENSIONS.find(d => d.id === ds.dimensionId)?.name[lang] ?? ds.dimensionId)
   }
 
-  const getCardLabel = (stmtId: string) => {
-    if (stmtId === mostId) return t.mostLike
-    if (stmtId === leastId) return t.leastLike
-    const midIdx = middleOrder.indexOf(stmtId)
-    if (midIdx >= 0) return `${midIdx + 2}${lang === 'en' ? ['nd', 'rd', 'th'][midIdx] : 'e'}`
-    return null
+  const getGaps = () => {
+    if (!results) return []
+    return results.dimensionScores
+      .filter(ds => ds.score < 40)
+      .sort((a, b) => a.score - b.score)
+      .slice(0, 3)
+      .map(ds => DIMENSIONS.find(d => d.id === ds.dimensionId)?.name[lang] ?? ds.dimensionId)
+  }
+
+  const getCascadeText = () => {
+    if (!results || results.cascadeGap === null) return ''
+    if (Math.abs(results.cascadeGap) <= 10) return t.cascadeGapStrong
+    if (Math.abs(results.cascadeGap) <= 30) return t.cascadeGapModerate
+    return t.cascadeGapWeak
+  }
+
+  const getOrbInterpretation = () => {
+    if (!results) return ''
+    return ORB_BANDS[results.overallBand]?.interpretation?.[lang] ?? ''
   }
 
   // ═══════════════════════════════════════
@@ -237,11 +232,11 @@ export default function ESDApp() {
               className="bg-purple text-white rounded-xl px-8 py-4 font-semibold hover:bg-purple/90 transition shadow-card">
               {t.startButton}
             </button>
-            <p className="text-xs text-ink/40">19 questions · ~10 minutes · {t.poweredBy}</p>
+            <p className="text-xs text-ink/40">19 questions · ~12 minutes · {t.poweredBy}</p>
           </div>
         )}
 
-        {/* ── QUESTIONS (Option B) ── */}
+        {/* ── QUESTIONS (Drag-and-drop ranking) ── */}
         {step === 'question' && currentQuestion && (
           <div className="space-y-8">
             {/* Progress */}
@@ -259,65 +254,63 @@ export default function ESDApp() {
             {/* Question */}
             <h2 className="text-xl font-bold text-ink leading-relaxed">{currentQuestion.text[lang]}</h2>
 
-            {/* Prompt */}
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-ink/70 uppercase tracking-wide">
-                {selectionStep === 'most' ? t.stepMost : selectionStep === 'least' ? t.stepLeast : t.stepMiddle}
-              </p>
-              {selectionStep !== 'most' && (
-                <button onClick={handleReset} className="text-xs text-ink/40 hover:text-ink underline">Reset</button>
-              )}
+            {/* Ranking instruction */}
+            <div className="space-y-1">
+              <p className="text-sm font-semibold text-ink/70 uppercase tracking-wide">{t.rankInstruction}</p>
+              <p className="text-xs text-ink/40">{t.rankHint}</p>
             </div>
 
-            {/* Statement cards */}
-            <div className="space-y-3">
-              {currentQuestion.statements.map((stmt) => {
-                const label = getCardLabel(stmt.id)
-                const isClickable = (selectionStep === 'most') || (selectionStep === 'least' && stmt.id !== mostId)
-                const isMid = middleOrder.includes(stmt.id)
-                const midIdx = middleOrder.indexOf(stmt.id)
+            {/* Ranked statement cards */}
+            <div className="space-y-2">
+              {rankedIds.map((stmtId, pos) => {
+                const stmt = currentQuestion.statements.find(s => s.id === stmtId)
+                if (!stmt) return null
+                const rc = getRankColor(pos)
+                const label = getRankLabel(pos, t)
 
                 return (
-                  <div key={stmt.id}
-                    onClick={() => isClickable ? handleCardClick(stmt.id) : undefined}
-                    className={`rounded-xl border-2 p-4 transition-all duration-200 ${getCardStyle(stmt.id)} ${isClickable ? '' : ''}`}>
+                  <div key={stmtId}
+                    className={`rounded-xl border-2 ${rc.border} ${rc.bg} p-4 transition-all duration-200`}>
                     <div className="flex items-start gap-3">
                       {/* Rank badge */}
-                      {label && (
-                        <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-xs font-bold
-                          ${stmt.id === mostId ? 'bg-teal text-white' : stmt.id === leastId ? 'bg-rose text-white' : 'bg-ink-50 text-ink/50'}`}>
-                          {stmt.id === mostId ? '1st' : stmt.id === leastId ? '5th' : label}
-                        </div>
-                      )}
-                      {!label && (
-                        <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-ink-50/50 flex items-center justify-center text-ink/20 text-lg">
-                          
-                        </div>
-                      )}
+                      <div className={`flex-shrink-0 w-16 text-center`}>
+                        <span className={`inline-block px-2 py-1 rounded-lg text-xs font-bold ${rc.text} ${rc.bg}`}>
+                          {label}
+                        </span>
+                      </div>
+
+                      {/* Statement text */}
                       <p className="text-sm text-ink leading-relaxed flex-1">{stmt.text[lang]}</p>
-                      {/* Swap button for middle cards */}
-                      {isMid && midIdx < middleOrder.length - 1 && selectionStep === 'done' && (
-                        <button onClick={(e) => { e.stopPropagation(); handleMiddleSwap(midIdx) }}
-                          className="flex-shrink-0 text-ink/30 hover:text-ink text-sm px-2 py-1 rounded hover:bg-ink-50">
-                          ↕
+
+                      {/* Up/Down arrows */}
+                      <div className="flex flex-col gap-1 flex-shrink-0">
+                        <button
+                          onClick={() => moveCard(pos, -1)}
+                          disabled={pos === 0}
+                          className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-ink/40 hover:text-ink hover:border-ink/30 disabled:opacity-20 disabled:cursor-not-allowed transition">
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2L10 7H2L6 2Z" fill="currentColor"/></svg>
                         </button>
-                      )}
+                        <button
+                          onClick={() => moveCard(pos, 1)}
+                          disabled={pos === rankedIds.length - 1}
+                          className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-ink/40 hover:text-ink hover:border-ink/30 disabled:opacity-20 disabled:cursor-not-allowed transition">
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 10L2 5H10L6 10Z" fill="currentColor"/></svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )
               })}
             </div>
 
-            {/* Context example */}
-            {isComplete && (
-              <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-ink/70 uppercase tracking-wide">{t.contextLabel}</h3>
-                <p className="text-sm text-ink/50 italic">{currentQuestion.contextPrompt[lang]}</p>
-                <textarea value={contextText} onChange={(e) => setContextText(e.target.value)}
-                  placeholder={t.contextPlaceholder}
-                  className="w-full h-24 rounded-xl border border-gray-200 p-4 text-sm text-ink resize-none focus:outline-none focus:ring-2 focus:ring-purple/30" />
-              </div>
-            )}
+            {/* Contextual intelligence textbox */}
+            <div className="space-y-3 pt-2">
+              <h3 className="text-sm font-semibold text-ink/70 uppercase tracking-wide">{t.contextLabel}</h3>
+              <p className="text-xs text-ink/40 leading-relaxed">{t.contextHelper}</p>
+              <textarea value={contextText} onChange={(e) => setContextText(e.target.value)}
+                placeholder={t.contextPlaceholder}
+                className="w-full h-28 rounded-xl border border-gray-200 p-4 text-sm text-ink resize-none focus:outline-none focus:ring-2 focus:ring-purple/30 bg-white" />
+            </div>
 
             {/* Nav buttons */}
             <div className="flex items-center justify-between pt-4">
@@ -325,9 +318,8 @@ export default function ESDApp() {
                 className="text-ink/50 hover:text-ink disabled:opacity-30 font-medium">
                 {t.previous}
               </button>
-              <button onClick={saveAndNext} disabled={!isComplete}
-                className={`rounded-xl px-8 py-3 font-semibold transition shadow-card ${
-                  isComplete ? 'bg-purple text-white hover:bg-purple/90' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}>
+              <button onClick={saveAndNext}
+                className="bg-purple text-white rounded-xl px-8 py-3 font-semibold hover:bg-purple/90 transition shadow-card">
                 {questionIndex < QUESTIONS.length - 1 ? t.continueButton : t.seeResults}
               </button>
             </div>
@@ -347,94 +339,172 @@ export default function ESDApp() {
 
         {/* ── DASHBOARD ── */}
         {step === 'dashboard' && results && (
-          <div className="space-y-10">
-            <h1 className="text-3xl font-bold text-ink text-center">{t.dashboardTitle}</h1>
+          <div className="space-y-8">
+            <h1 className="text-2xl font-bold text-ink text-center">{t.dashboardTitle}</h1>
 
-            {/* Overall */}
+            {/* Overall Score */}
             <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-card text-center space-y-4">
-              <h2 className="text-sm font-semibold text-ink/50 uppercase tracking-wide">{t.overallScore}</h2>
+              <h2 className="text-xs font-semibold text-ink/40 uppercase tracking-widest">{t.overallScore}</h2>
               <div className="flex justify-center"><ScoreGauge score={results.overallScore} band={results.overallBand} size={180} /></div>
               <BandBadge band={results.overallBand} lang={lang} />
+              <p className="text-sm text-ink/60 leading-relaxed max-w-xl mx-auto">{getOrbInterpretation()}</p>
             </div>
 
-            {/* Dimensions */}
+            {/* Executive Summary */}
             <div className="rounded-2xl border border-gray-200 bg-white shadow-card overflow-hidden">
-              <div className="p-6 border-b border-gray-100">
-                <h2 className="text-sm font-semibold text-ink/50 uppercase tracking-wide">{t.dimensionScores}</h2>
+              <div className="px-6 py-4 border-b border-gray-100">
+                <h2 className="text-xs font-semibold text-ink/40 uppercase tracking-widest">{t.executiveSummary}</h2>
               </div>
-              <div className="divide-y divide-gray-100">
+              <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+                {/* Strengths */}
+                <div className="p-6 space-y-2">
+                  <p className="text-xs font-semibold text-teal uppercase tracking-wide flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-teal/10 flex items-center justify-center text-teal text-xs">{'\u2713'}</span>
+                    {t.strengths}
+                  </p>
+                  {getStrengths().length > 0 ? (
+                    <ul className="space-y-1">{getStrengths().map((s, i) => (
+                      <li key={i} className="text-sm text-ink">{s}</li>
+                    ))}</ul>
+                  ) : <p className="text-sm text-ink/40">{t.noStrengths}</p>}
+                </div>
+                {/* Priority gaps */}
+                <div className="p-6 space-y-2">
+                  <p className="text-xs font-semibold text-orange uppercase tracking-wide flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-orange/10 flex items-center justify-center text-orange text-xs">{'\u26a0'}</span>
+                    {t.priorityGaps}
+                  </p>
+                  {getGaps().length > 0 ? (
+                    <ul className="space-y-1">{getGaps().map((s, i) => (
+                      <li key={i} className="text-sm text-ink">{s}</li>
+                    ))}</ul>
+                  ) : <p className="text-sm text-ink/40">{t.noGaps}</p>}
+                </div>
+                {/* Primary tension */}
+                <div className="p-6 space-y-2">
+                  <p className="text-xs font-semibold text-purple uppercase tracking-wide flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-purple/10 flex items-center justify-center text-purple text-xs">{'\u2192'}</span>
+                    {t.primaryTension}
+                  </p>
+                  {results.firedPatterns.length > 0 ? (
+                    <p className="text-sm text-ink">{PATTERNS[results.firedPatterns[0].patternId]?.name[lang]}</p>
+                  ) : <p className="text-sm text-ink/40">{t.noTensions}</p>}
+                </div>
+              </div>
+            </div>
+
+            {/* Dimension Scorecards — 2 column grid */}
+            <div>
+              <h2 className="text-xs font-semibold text-ink/40 uppercase tracking-widest mb-4">{t.dimensionScores}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {results.dimensionScores.map(ds => {
                   const dim = DIMENSIONS.find(d => d.id === ds.dimensionId)
                   if (!dim) return null
+                  const orbText = ORB_BANDS[ds.band]?.interpretation?.[lang] ?? ''
                   return (
-                    <div key={ds.dimensionId} className="px-6 py-4 flex items-center gap-4">
-                      <div className="flex-1">
-                        <p className="font-semibold text-ink text-sm">{dim.name[lang]}</p>
-                        <p className="text-xs text-ink/40">{dim.system === 'Structural' ? t.structuralSystem : t.socialSystem} · {Math.round(dim.weight * 100)}%</p>
-                      </div>
-                      <div className="text-right space-y-1">
-                        <div className="flex items-center gap-3">
-                          <span className="text-lg font-bold text-ink">{Math.round(ds.score)}</span>
+                    <div key={ds.dimensionId} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-card transition">
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <p className="font-semibold text-ink text-sm">{dim.name[lang]}</p>
+                          <p className="text-xs text-ink/40 mt-0.5">{dim.system === 'Structural' ? t.structuralSystem : t.socialSystem} · {Math.round(dim.weight * 100)}%</p>
+                        </div>
+                        <div className="text-right flex items-center gap-2">
+                          <span className="text-2xl font-bold text-ink">{Math.round(ds.score)}</span>
                           <BandBadge band={ds.band} lang={lang} />
                         </div>
-                        {dim.hasDesignAdoption && ds.designScore !== undefined && ds.adoptionScore !== undefined && (
-                          <p className="text-xs text-ink/40">{t.design}: {Math.round(ds.designScore)} · {t.adoption}: {Math.round(ds.adoptionScore)}</p>
-                        )}
-                        {ds.varianceFlag === 'High Variance' && (
-                          <p className="text-xs text-orange font-medium">{t.highVariance}</p>
-                        )}
                       </div>
+                      {dim.hasDesignAdoption && ds.designScore !== undefined && ds.adoptionScore !== undefined && (
+                        <div className="flex items-center gap-4 mb-2">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-2 h-2 rounded-full bg-teal/40" />
+                            <span className="text-xs text-ink/50">{t.design}: {Math.round(ds.designScore)}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-2 h-2 rounded-full bg-purple/40" />
+                            <span className="text-xs text-ink/50">{t.adoption}: {Math.round(ds.adoptionScore)}</span>
+                          </div>
+                        </div>
+                      )}
+                      {ds.varianceFlag === 'High Variance' && (
+                        <p className="text-xs text-orange font-medium mb-1">{t.highVariance}</p>
+                      )}
                     </div>
                   )
                 })}
               </div>
             </div>
 
-            {/* Cascade gap */}
+            {/* Leadership Cascade — human-readable */}
             {results.cascadeGap !== null && (
-              <div className={`rounded-2xl border p-6 shadow-card ${results.cascadeGap > 30 ? 'border-rose bg-rose-50' : 'border-gray-200 bg-white'}`}>
-                <h2 className="text-sm font-semibold text-ink/50 uppercase tracking-wide mb-3">{t.cascadeGap}</h2>
-                <div className="flex items-center gap-6">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-ink">{Math.round(results.dimensionScores.flatMap(d => d.questionScores).find(q => q.questionId === 'Q11a')?.score ?? 0)}</p>
-                    <p className="text-xs text-ink/40">Q11a (Senior)</p>
-                  </div>
-                  <div className="text-2xl text-ink/30">\u2192</div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-ink">{Math.round(results.dimensionScores.flatMap(d => d.questionScores).find(q => q.questionId === 'Q11b')?.score ?? 0)}</p>
-                    <p className="text-xs text-ink/40">Q11b (Next layer)</p>
-                  </div>
-                  <div className="text-2xl text-ink/30">=</div>
-                  <div className="text-center">
-                    <p className={`text-2xl font-bold ${results.cascadeGap > 30 ? 'text-rose' : 'text-ink'}`}>{Math.round(results.cascadeGap)}</p>
-                    <p className="text-xs text-ink/40">Gap</p>
-                  </div>
+              <div className="rounded-2xl border border-gray-200 bg-white shadow-card overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-100">
+                  <h2 className="text-xs font-semibold text-ink/40 uppercase tracking-widest">{t.cascadeGap}</h2>
                 </div>
-                {results.cascadeGap > 30 && <p className="mt-3 text-sm text-rose font-medium">{t.significantCascadeFailure}</p>}
+                <div className="p-6">
+                  <div className="flex items-center gap-8 mb-4">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-ink">{Math.round(results.dimensionScores.flatMap(d => d.questionScores).find(q => q.questionId === 'Q11a')?.score ?? 0)}</p>
+                      <p className="text-xs text-ink/40">{t.senior}</p>
+                    </div>
+                    <div className="text-xl text-ink/20">{'\u2192'}</div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-ink">{Math.round(results.dimensionScores.flatMap(d => d.questionScores).find(q => q.questionId === 'Q11b')?.score ?? 0)}</p>
+                      <p className="text-xs text-ink/40">{t.nextLayer}</p>
+                    </div>
+                    <div className="text-xl text-ink/20">=</div>
+                    <div className="text-center">
+                      <p className={`text-2xl font-bold ${Math.abs(results.cascadeGap) > 30 ? 'text-orange' : 'text-ink'}`}>{Math.round(Math.abs(results.cascadeGap))}</p>
+                      <p className="text-xs text-ink/40">{t.gap}</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-ink/60 leading-relaxed">{getCascadeText()}</p>
+                </div>
               </div>
             )}
 
-            {/* Patterns & FM */}
-            <div className="grid grid-cols-2 gap-6">
-              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-card">
-                <h2 className="text-sm font-semibold text-ink/50 uppercase tracking-wide mb-3">{t.patternsDetected}</h2>
-                {results.firedPatterns.length === 0 ? <p className="text-sm text-ink/40">{t.noneDetected}</p> : (
-                  <ul className="space-y-2">{results.firedPatterns.map(p => (
-                    <li key={p.patternId} className="text-sm text-ink font-medium">{PATTERNS[p.patternId]?.name[lang]}</li>
-                  ))}</ul>
-                )}
+            {/* Patterns & Failure Modes — with explanations */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Patterns */}
+              <div className="rounded-2xl border border-gray-200 bg-white shadow-card overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-100">
+                  <h2 className="text-xs font-semibold text-ink/40 uppercase tracking-widest">{t.patternsDetected}</h2>
+                </div>
+                <div className="p-6">
+                  {results.firedPatterns.length === 0 ? <p className="text-sm text-ink/40">{t.noneDetected}</p> : (
+                    <ul className="space-y-4">{results.firedPatterns.map(p => {
+                      const pat = PATTERNS[p.patternId]
+                      return (
+                        <li key={p.patternId}>
+                          <p className="text-sm font-semibold text-ink">{pat?.name[lang]}</p>
+                          <p className="text-xs text-ink/50 mt-1 leading-relaxed">{pat?.interpretation[lang]?.substring(0, 150)}...</p>
+                        </li>
+                      )
+                    })}</ul>
+                  )}
+                </div>
               </div>
-              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-card">
-                <h2 className="text-sm font-semibold text-ink/50 uppercase tracking-wide mb-3">{t.failureModesTriggered}</h2>
-                {results.firedFailureModes.length === 0 ? <p className="text-sm text-ink/40">{t.noneDetected}</p> : (
-                  <ul className="space-y-2">{results.firedFailureModes.map(f => (
-                    <li key={f.failureModeId} className="text-sm text-rose font-medium">{FAILURE_MODES[f.failureModeId]?.name[lang]}</li>
-                  ))}</ul>
-                )}
+              {/* Failure Modes */}
+              <div className="rounded-2xl border border-gray-200 bg-white shadow-card overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-100">
+                  <h2 className="text-xs font-semibold text-ink/40 uppercase tracking-widest">{t.failureModesTriggered}</h2>
+                </div>
+                <div className="p-6">
+                  {results.firedFailureModes.length === 0 ? <p className="text-sm text-ink/40">{t.noneDetected}</p> : (
+                    <ul className="space-y-4">{results.firedFailureModes.map(f => {
+                      const fm = FAILURE_MODES[f.failureModeId]
+                      return (
+                        <li key={f.failureModeId}>
+                          <p className="text-sm font-semibold text-ink">{fm?.name[lang]}</p>
+                          <p className="text-xs text-ink/50 mt-1 leading-relaxed">{fm?.description[lang]?.substring(0, 150)}...</p>
+                        </li>
+                      )
+                    })}</ul>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="text-center">
+            <div className="text-center pt-4">
               <button onClick={generateReport}
                 className="bg-purple text-white rounded-xl px-8 py-4 font-semibold hover:bg-purple/90 transition shadow-card">
                 {t.viewReport}
@@ -469,7 +539,7 @@ export default function ESDApp() {
                 if (line.startsWith('### ')) return <h3 key={i}>{line.slice(4)}</h3>
                 if (line.startsWith('#### ')) return <h4 key={i}>{line.slice(5)}</h4>
                 if (line.startsWith('**') && line.endsWith('**')) return <p key={i}><strong>{line.slice(2, -2)}</strong></p>
-                if (line.startsWith('- ')) return <p key={i} className="pl-4">\u2022 {line.slice(2)}</p>
+                if (line.startsWith('- ')) return <p key={i} className="pl-4">{'\u2022'} {line.slice(2)}</p>
                 if (line.startsWith('---')) return <hr key={i} className="my-6 border-gray-200" />
                 if (line.trim() === '') return <br key={i} />
                 return <p key={i}>{line}</p>
