@@ -381,10 +381,8 @@ export default function ESDApp() {
               </div>
             </div>
 
-            {/* Dimension cards + Flags column */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Dimensions — 2-col grid taking 2/3 */}
-              <div className="lg:col-span-2">
+            {/* Dimension Assessment */}
+            <div>
                 <h2 className="text-xs font-semibold text-ink/40 uppercase tracking-widest mb-4">{t.dimensionScores}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {results.dimensionScores.map(ds => {
@@ -413,48 +411,46 @@ export default function ESDApp() {
                     )
                   })}
                 </div>
-              </div>
+            </div>
 
-              {/* Flags column — right side */}
-              <div className="space-y-4">
-                {/* Tension flag */}
-                <div className="rounded-xl border-2 border-rose bg-rose-50 p-5">
-                  <h3 className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: BRAND.rose }}>{t.patternsDetected}</h3>
-                  {results.firedPatterns.length === 0 ? <p className="text-sm text-ink/30 italic">{t.noneDetected}</p> : (
-                    <ul className="space-y-3">{results.firedPatterns.map(p => {
-                      const pat = PATTERNS[p.patternId]; return (
-                        <li key={p.patternId}><p className="text-sm font-semibold" style={{ color: BRAND.ink }}>{pat?.name[lang]}</p>
-                          <p className="text-xs text-ink/40 mt-1 leading-relaxed">{pat?.interpretation[lang]?.substring(0, 120)}...</p></li>
-                    )})}</ul>
-                  )}
-                </div>
-                {/* Risk flag */}
-                <div className="rounded-xl border-2 border-orange bg-orange-50 p-5">
-                  <h3 className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: BRAND.orange }}>{t.failureModesTriggered}</h3>
-                  {results.firedFailureModes.length === 0 ? <p className="text-sm text-ink/30 italic">{t.noneDetected}</p> : (
-                    <ul className="space-y-3">{results.firedFailureModes.map(f => {
-                      const fm = FAILURE_MODES[f.failureModeId]; return (
-                        <li key={f.failureModeId}><p className="text-sm font-semibold" style={{ color: BRAND.ink }}>{fm?.name[lang]}</p>
-                          <p className="text-xs text-ink/40 mt-1 leading-relaxed">{fm?.description[lang]?.substring(0, 120)}...</p></li>
-                    )})}</ul>
-                  )}
-                </div>
-                {/* Cascade */}
-                {results.cascadeGap !== null && (
-                  <div className="rounded-xl border border-gray-200 bg-white p-5">
-                    <h3 className="text-xs font-semibold text-ink/40 uppercase tracking-wide mb-3">{t.cascadeGap}</h3>
-                    <div className="flex items-center gap-4 mb-3">
-                      <div className="text-center"><p className="text-xl font-bold" style={{ color: BRAND.ink }}>{Math.round(results.dimensionScores.flatMap(d => d.questionScores).find(q => q.questionId === 'Q11a')?.score ?? 0)}</p><p className="text-xs text-ink/35">{t.senior}</p></div>
-                      <span className="text-ink/20">{'\u2192'}</span>
-                      <div className="text-center"><p className="text-xl font-bold" style={{ color: BRAND.ink }}>{Math.round(results.dimensionScores.flatMap(d => d.questionScores).find(q => q.questionId === 'Q11b')?.score ?? 0)}</p><p className="text-xs text-ink/35">{t.nextLayer}</p></div>
-                      <span className="text-ink/20">=</span>
-                      <div className="text-center"><p className="text-xl font-bold" style={{ color: Math.abs(results.cascadeGap) > 30 ? BRAND.orange : BRAND.ink }}>{Math.round(Math.abs(results.cascadeGap))}</p><p className="text-xs text-ink/35">{t.gap}</p></div>
-                    </div>
-                    <p className="text-xs text-ink/40 leading-relaxed">{getCascadeText()}</p>
-                  </div>
+            {/* Structural Tensions + Failure Modes — below Dimension Assessment */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="rounded-xl border-2 border-rose bg-rose-50 p-5">
+                <h3 className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: BRAND.rose }}>{t.patternsDetected}</h3>
+                {results.firedPatterns.length === 0 ? <p className="text-sm text-ink/30 italic">{t.noneDetected}</p> : (
+                  <ul className="space-y-3">{results.firedPatterns.map(p => {
+                    const pat = PATTERNS[p.patternId]; return (
+                      <li key={p.patternId}><p className="text-sm font-semibold" style={{ color: BRAND.ink }}>{pat?.name[lang]}</p>
+                        <p className="text-xs text-ink/40 mt-1 leading-relaxed">{pat?.interpretation[lang]?.substring(0, 120)}...</p></li>
+                  )})}</ul>
+                )}
+              </div>
+              <div className="rounded-xl border-2 border-orange bg-orange-50 p-5">
+                <h3 className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: BRAND.orange }}>{t.failureModesTriggered}</h3>
+                {results.firedFailureModes.length === 0 ? <p className="text-sm text-ink/30 italic">{t.noneDetected}</p> : (
+                  <ul className="space-y-3">{results.firedFailureModes.map(f => {
+                    const fm = FAILURE_MODES[f.failureModeId]; return (
+                      <li key={f.failureModeId}><p className="text-sm font-semibold" style={{ color: BRAND.ink }}>{fm?.name[lang]}</p>
+                        <p className="text-xs text-ink/40 mt-1 leading-relaxed">{fm?.description[lang]?.substring(0, 120)}...</p></li>
+                  )})}</ul>
                 )}
               </div>
             </div>
+
+            {/* Leadership Cascade Gap */}
+            {results.cascadeGap !== null && (
+              <div className="rounded-xl border border-gray-200 bg-white p-6">
+                <h3 className="text-xs font-semibold text-ink/40 uppercase tracking-wide mb-4">{t.cascadeGap}</h3>
+                <div className="flex items-center gap-6 mb-4">
+                  <div className="text-center"><p className="text-2xl font-bold" style={{ color: BRAND.ink }}>{Math.round(results.dimensionScores.flatMap(d => d.questionScores).find(q => q.questionId === 'Q11a')?.score ?? 0)}</p><p className="text-xs text-ink/35">{t.senior}</p></div>
+                  <span className="text-xl text-ink/20">{'\u2192'}</span>
+                  <div className="text-center"><p className="text-2xl font-bold" style={{ color: BRAND.ink }}>{Math.round(results.dimensionScores.flatMap(d => d.questionScores).find(q => q.questionId === 'Q11b')?.score ?? 0)}</p><p className="text-xs text-ink/35">{t.nextLayer}</p></div>
+                  <span className="text-xl text-ink/20">=</span>
+                  <div className="text-center"><p className="text-2xl font-bold" style={{ color: Math.abs(results.cascadeGap) > 30 ? BRAND.orange : BRAND.ink }}>{Math.round(Math.abs(results.cascadeGap))}</p><p className="text-xs text-ink/35">{t.gap}</p></div>
+                </div>
+                <p className="text-sm text-ink/50 leading-relaxed">{getCascadeText()}</p>
+              </div>
+            )}
 
             <div className="text-center pt-4">
               <button onClick={generateReport} className="rounded-xl px-8 py-4 font-semibold text-white hover:opacity-90 transition shadow-lg" style={{ backgroundColor: BRAND.purple }}>{t.viewReport}</button>
