@@ -1,1 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#0DCBC4"/><text x="16" y="21" text-anchor="middle" fill="white" font-family="Arial" font-weight="bold" font-size="16">M</text></svg>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100.6789 100.6789">
+  <g id="type">
+    <polygon id="type_PathItem_" data-name="type &lt;PathItem&gt;" points="5 50.339 5 5 50.339 5 5 50.339" style="fill: #f79f1f"/>
+    <polygon id="type_PathItem_2" data-name="type &lt;PathItem&gt;" points="44.334 81.728 44.334 36.389 89.673 36.389 44.334 81.728" style="fill: #d1406c"/>
+    <polygon id="type_PathItem_3" data-name="type &lt;PathItem&gt;" points="95.679 42.743 95.679 95.679 46.815 95.679 95.679 42.743" style="fill: #12cbc4"/>
+    <polygon id="type_PathItem_4" data-name="type &lt;PathItem&gt;" points="44.334 25.926 65.26 5 95.679 5 95.679 25.926 44.334 25.926 44.334 25.926" style="fill: #cc7ced"/>
+    <polygon id="type_PathItem_5" data-name="type &lt;PathItem&gt;" points="5 65.118 33.729 36.389 33.729 95.679 5 95.679 5 65.118" style="fill: #4587c9"/>
+  </g>
+</svg>
