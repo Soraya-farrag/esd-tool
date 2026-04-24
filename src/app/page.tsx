@@ -215,7 +215,29 @@ export default function ESDApp() {
 
   const getStrengths = () => results?.dimensionScores.filter(ds => ds.score >= 61).sort((a, b) => b.score - a.score).slice(0, 3).map(ds => DIMENSIONS.find(d => d.id === ds.dimensionId)?.name[lang] ?? '') ?? []
   const getGaps = () => results?.dimensionScores.filter(ds => ds.score < 40).sort((a, b) => a.score - b.score).slice(0, 3).map(ds => DIMENSIONS.find(d => d.id === ds.dimensionId)?.name[lang] ?? '') ?? []
-  const getCascadeText = () => { if (!results?.cascadeGap) return ''; const g = Math.abs(results.cascadeGap); return g <= 10 ? t.cascadeGapStrong : g <= 30 ? t.cascadeGapModerate : t.cascadeGapWeak }
+  const getStrengthDetails = () => results?.dimensionScores.filter(ds => ds.score >= 61).sort((a, b) => b.score - a.score).slice(0, 3).map(ds => {
+    const dim = DIMENSIONS.find(d => d.id === ds.dimensionId)
+    return { name: dim?.name[lang] ?? '', desc: dim?.description[lang] ?? '', score: Math.round(ds.score) }
+  }) ?? []
+  const getGapDetails = () => results?.dimensionScores.filter(ds => ds.score < 40).sort((a, b) => a.score - b.score).slice(0, 3).map(ds => {
+    const dim = DIMENSIONS.find(d => d.id === ds.dimensionId)
+    return { name: dim?.name[lang] ?? '', desc: dim?.description[lang] ?? '', score: Math.round(ds.score) }
+  }) ?? []
+  const getCascadeText = () => {
+    if (!results?.cascadeGap) return ''
+    const q11a = Math.round(results.dimensionScores.flatMap(d => d.questionScores).find(q => q.questionId === 'Q11a')?.score ?? 0)
+    const q11b = Math.round(results.dimensionScores.flatMap(d => d.questionScores).find(q => q.questionId === 'Q11b')?.score ?? 0)
+    const gap = Math.round(Math.abs(results.cascadeGap))
+    if (gap <= 10) return lang === 'en'
+      ? `With a gap of only ${gap} points between the senior team (${q11a}) and the next layer (${q11b}), leadership intent remains consistent across organisational layers \u2014 suggesting strong translation between strategic direction and operational interpretation.`
+      : `Avec un \u00e9cart de seulement ${gap} points entre l\u2019\u00e9quipe dirigeante (${q11a}) et le niveau suivant (${q11b}), l\u2019intention strat\u00e9gique reste coh\u00e9rente \u2014 ce qui sugg\u00e8re une bonne traduction entre direction strat\u00e9gique et interpr\u00e9tation op\u00e9rationnelle.`
+    if (gap <= 30) return lang === 'en'
+      ? `A gap of ${gap} points between the senior team (${q11a}) and the next layer (${q11b}) indicates that leadership intent shows moderate variation across layers. Strategic priorities may be interpreted differently as they cascade, creating uneven execution quality.`
+      : `Un \u00e9cart de ${gap} points entre l\u2019\u00e9quipe dirigeante (${q11a}) et le niveau suivant (${q11b}) indique une variation mod\u00e9r\u00e9e de l\u2019intention strat\u00e9gique. Les priorit\u00e9s risquent d\u2019\u00eatre interpr\u00e9t\u00e9es diff\u00e9remment en cascadant, cr\u00e9ant une qualit\u00e9 d\u2019ex\u00e9cution in\u00e9gale.`
+    return lang === 'en'
+      ? `A gap of ${gap} points between the senior team (${q11a}) and the next layer (${q11b}) reveals a significant breakdown in leadership cascade. Strategic direction is being interpreted very differently \u2014 or actively resisted \u2014 as it moves through the organisation. This is one of the most critical execution risks detected.`
+      : `Un \u00e9cart de ${gap} points entre l\u2019\u00e9quipe dirigeante (${q11a}) et le niveau suivant (${q11b}) r\u00e9v\u00e8le une rupture significative dans la cascade du leadership. La direction strat\u00e9gique est interpr\u00e9t\u00e9e tr\u00e8s diff\u00e9remment \u2014 ou activement r\u00e9sist\u00e9e \u2014 en traversant l\u2019organisation.`
+  }
   const getOrbInterp = () => ORB_BANDS[results?.overallBand ?? 'amber']?.interpretation?.[lang] ?? ''
 
   return (
@@ -352,7 +374,7 @@ export default function ESDApp() {
                     </p>
                     <p className="text-xs text-ink/30 mt-1.5 leading-relaxed">{t.strengthsExplain}</p>
                   </div>
-                  {getStrengths().length > 0 ? <ul className="space-y-1">{getStrengths().map((s, i) => <li key={i} className="text-sm text-ink font-medium">{s}</li>)}</ul>
+                  {getStrengthDetails().length > 0 ? <ul className="space-y-2">{getStrengthDetails().map((s, i) => <li key={i}><p className="text-sm text-ink font-medium">{s.name} ({s.score})</p><p className="text-xs text-ink/40 mt-0.5 leading-relaxed">{s.desc}</p></li>)}</ul>
                     : <p className="text-sm text-ink/30 italic">{t.noStrengths}</p>}
                 </div>
                 <div className="p-6 space-y-3">
@@ -363,7 +385,7 @@ export default function ESDApp() {
                     </p>
                     <p className="text-xs text-ink/30 mt-1.5 leading-relaxed">{t.priorityGapsExplain}</p>
                   </div>
-                  {getGaps().length > 0 ? <ul className="space-y-1">{getGaps().map((s, i) => <li key={i} className="text-sm text-ink font-medium">{s}</li>)}</ul>
+                  {getGapDetails().length > 0 ? <ul className="space-y-2">{getGapDetails().map((s, i) => <li key={i}><p className="text-sm text-ink font-medium">{s.name} ({s.score})</p><p className="text-xs text-ink/40 mt-0.5 leading-relaxed">{s.desc}</p></li>)}</ul>
                     : <p className="text-sm text-ink/30 italic">{t.noGaps}</p>}
                 </div>
                 <div className="p-6 space-y-3">
@@ -375,7 +397,7 @@ export default function ESDApp() {
                     <p className="text-xs text-ink/30 mt-1.5 leading-relaxed">{t.primaryTensionExplain}</p>
                   </div>
                   {results.firedPatterns.length > 0
-                    ? <p className="text-sm text-ink font-medium">{PATTERNS[results.firedPatterns[0].patternId]?.name[lang]}</p>
+                    ? <div><p className="text-sm text-ink font-medium">{PATTERNS[results.firedPatterns[0].patternId]?.name[lang]}</p><p className="text-xs text-ink/40 mt-0.5 leading-relaxed">{PATTERNS[results.firedPatterns[0].patternId]?.interpretation[lang]?.substring(0, 200)}...</p></div>
                     : <p className="text-sm text-ink/30 italic">{t.noTensions}</p>}
                 </div>
               </div>
