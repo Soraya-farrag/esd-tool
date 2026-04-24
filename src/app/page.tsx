@@ -224,7 +224,7 @@ export default function ESDApp() {
     return { name: dim?.name[lang] ?? '', desc: dim?.description[lang] ?? '', score: Math.round(ds.score) }
   }) ?? []
   const getCascadeText = () => {
-    if (!results?.cascadeGap) return ''
+    if (results?.cascadeGap === null || results?.cascadeGap === undefined) return ''
     const q11a = Math.round(results.dimensionScores.flatMap(d => d.questionScores).find(q => q.questionId === 'Q11a')?.score ?? 0)
     const q11b = Math.round(results.dimensionScores.flatMap(d => d.questionScores).find(q => q.questionId === 'Q11b')?.score ?? 0)
     const gap = Math.round(Math.abs(results.cascadeGap))
