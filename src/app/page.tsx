@@ -25,8 +25,8 @@ function ScoreGauge({ score, band, size = 180 }: { score: number; band: Band; si
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="10" />
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={BRAND.teal} strokeWidth="10"
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="6" />
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={BRAND.teal} strokeWidth="6"
           strokeDasharray={circ} strokeDashoffset={circ - prog}
           strokeLinecap="round" className="transition-all duration-1000 ease-out" />
       </svg>
@@ -374,7 +374,7 @@ export default function ESDApp() {
               <div className="px-6 py-4 border-b border-gray-100">
                 <h2 className="text-xs font-semibold text-ink/40 uppercase tracking-widest">{t.executiveSummary}</h2>
               </div>
-              <div className="divide-y divide-gray-100">
+              <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
                 <div className="p-6 space-y-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wide flex items-center gap-2" style={{ color: BRAND.teal }}>
@@ -446,8 +446,8 @@ export default function ESDApp() {
 
             {/* Structural Tensions + Failure Modes — below Dimension Assessment */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="rounded-xl border-2 border-rose bg-rose-50 p-6 shadow-sm">
-                <h3 className="text-sm font-semibold uppercase tracking-wide mb-4" style={{ color: BRAND.rose }}>{t.patternsDetected}</h3>
+              <div className="rounded-xl border-2 bg-[#D1406C]/10 p-6 shadow-sm" style={{ borderColor: '#D1406C' }}>
+                <h3 className="text-sm font-semibold uppercase tracking-wide mb-4" style={{ color: '#D1406C' }}>{t.patternsDetected}</h3>
                 {getTopPatterns(3).length === 0 ? <p className="text-sm text-ink/30 italic">{t.noneDetected}</p> : (
                   <ul className="space-y-4">{getTopPatterns(3).map(p => {
                     const pat = PATTERNS[p.patternId]; return (
@@ -456,8 +456,8 @@ export default function ESDApp() {
                   )})}</ul>
                 )}
               </div>
-              <div className="rounded-xl border-2 border-orange bg-orange-50 p-6 shadow-sm">
-                <h3 className="text-sm font-semibold uppercase tracking-wide mb-4" style={{ color: BRAND.orange }}>{t.failureModesTriggered}</h3>
+              <div className="rounded-xl border-2 bg-[#4587C9]/10 p-6 shadow-sm" style={{ borderColor: '#4587C9' }}>
+                <h3 className="text-sm font-semibold uppercase tracking-wide mb-4" style={{ color: '#4587C9' }}>{t.failureModesTriggered}</h3>
                 {getTopFailureModes(3).length === 0 ? <p className="text-sm text-ink/30 italic">{t.noneDetected}</p> : (
                   <ul className="space-y-4">{getTopFailureModes(3).map(f => {
                     const fm = FAILURE_MODES[f.failureModeId]; return (
