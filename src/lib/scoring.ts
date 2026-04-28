@@ -37,11 +37,11 @@ export function getBand(score: number): Band {
 
 export function getBandLabel(band: Band, lang: 'en' | 'fr'): string {
   const labels: Record<Band, { en: string; fr: string }> = {
-    critical: { en: 'Critical', fr: 'Critique' },
-    red: { en: 'Red', fr: 'Rouge' },
-    amber: { en: 'Amber', fr: 'Orange' },
-    yellow: { en: 'Yellow', fr: 'Jaune' },
-    green: { en: 'Green', fr: 'Vert' },
+    critical: { en: 'Critical Risk', fr: 'Risque Critique' },
+    red: { en: 'Low Readiness', fr: 'Faible Maturit\u00e9' },
+    amber: { en: 'Moderate Readiness', fr: 'Maturit\u00e9 Mod\u00e9r\u00e9e' },
+    yellow: { en: 'Strong Readiness', fr: 'Bonne Maturit\u00e9' },
+    green: { en: 'High Readiness', fr: 'Maturit\u00e9 \u00c9lev\u00e9e' },
   }
   return labels[band][lang]
 }
@@ -209,7 +209,7 @@ export function computeTraitScores(
         else { tMax += alloc * 0.0; tMin += alloc * (-1.0) }
       }
       const range = tMax - tMin
-      if (range === 0) continue
+      if (range === 0) return
       contributions.push(Math.max(0, Math.min(100, 100 * (raw - tMin) / range)))
     }
     const avg = contributions.length > 0

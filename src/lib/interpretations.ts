@@ -707,87 +707,101 @@ export const D_BAND_INTERPS: Record<string, Record<Band, { text: { en: string; f
 }
 
 // ── Patterns (14) ──
-export const PATTERNS: Record<string, { name: { en: string; fr: string }; interpretation: { en: string; fr: string }; dimensions: string; traits: string }> = {
+export const PATTERNS: Record<string, { name: { en: string; fr: string }; severity: 'High' | 'Medium-High' | 'Medium'; interpretation: { en: string; fr: string }; dimensions: string; traits: string }> = {
  'PAT_BC': {
   name: { en: `The Bottleneck Cascade`, fr: `L'Effet Cascade` },
+  severity: 'High',
   interpretation: { en: `Slow decisions combined with weak monitoring create a compounding execution failure. Decisions stall at governance bottlenecks, and by the time anyone detects the delay's downstream impact, multiple workstreams are affected. The organisation is both slow to act and slow to see the consequences of inaction.`, fr: `Des décisions lentes combinées à un suivi faible créent une défaillance d'exécution cumulative. Les décisions s'accumulent dans les blocages de gouvernance et personne ne voit la cascade. Plusieurs flux de travail sont affectés avant qu'aucune action corrective ne soit prise.` },
   dimensions: `D1, D5`,
   traits: `TRT_CA, TRT_AC, TRT_II`,
  },
  'PAT_AI': {
   name: { en: `The Alignment Illusion`, fr: `L'Illusion d'Alignement` },
+  severity: 'Medium-High',
   interpretation: { en: `Leaders believe they are aligned, but the organisation cannot translate that alignment into synchronised action. The strategy exists coherently at the top but dissolves in the middle, where teams lack the coordination mechanisms to act on the aligned direction. This is one of the most common and most frustrating execution failures — everything looks right from above, but nothing works below.`, fr: `Les dirigeants croient être alignés, mais l'organisation ne peut pas traduire cet alignement en action synchronisée. L'alignement au sommet crée de la complaisance quant aux faiblesses de coordination. Les ressources ne sont pas dirigées vers la correction de la synchronisation car le leadership croit que le problème est ailleurs.` },
   dimensions: `D3, D6`,
   traits: `TRT_SA, TRT_CI, TRT_CA`,
  },
  'PAT_CF': {
   name: { en: `The Cascade Failure`, fr: `La Défaillance en Cascade` },
+  severity: 'High',
   interpretation: { en: `The senior team is genuinely aligned, but alignment does not survive the cascade to the next leadership layer. This is not a communication problem — it is an enforcement problem. The gap between Q11a and Q11b scores reveals where strategic intent is lost: either through deliberate resistance at the next layer, or through a translation mechanism that softens commitments as they flow downward. This is one of the most common and most frustrating execution failures because it is invisible from the top — leaders believe alignment exists because it exists in their room.`, fr: `L'équipe dirigeante est véritablement alignée, mais l'alignement ne survit pas à la cascade vers la couche suivante de leadership. L'écart révèle le point exact où l'intention stratégique se perd. Ce n'est pas un problème de communication — c'est un problème d'exécution ou d'implication qui doit être traité structurellement.` },
   dimensions: `D6`,
   traits: `TRT_SA, TRT_CO, TRT_LI`,
  },
  'PAT_CV': {
   name: { en: `The Communication Void`, fr: `Le Vide Communicationnel` },
+  severity: 'Medium-High',
   interpretation: { en: `People don't understand the strategy AND they don't feel ownership of it. This creates a passive organisation that will comply with instructions but will not problem-solve, adapt, or go beyond the minimum. The combination is particularly dangerous because low understanding prevents engagement, and low engagement prevents the effort needed to build understanding — a self-reinforcing negative cycle.`, fr: `Les collaborateurs ne comprennent pas la stratégie ET ne ressentent pas d'appropriation. Cela crée une organisation passive qui se conforme aux instructions de déploiement mais ne résout pas les problèmes, ne s'adapte pas et ne va pas au-delà du minimum. La culture d'exécution passive fait de chaque obstacle un point d'arrêt potentiel.` },
   dimensions: `D7, D8`,
   traits: `TRT_II, TRT_CO, TRT_SA`,
  },
  'PAT_GR': {
   name: { en: `Goals Without Rails`, fr: `Des Objectifs Sans Rails` },
+  severity: 'Medium-High',
   interpretation: { en: `Goals are poorly constructed AND teams can't coordinate to deliver on them. Strategic ambitions fracture into disconnected workstreams with no synchronisation, no dependency management, and no way to tell whether the pieces add up to the whole. Each team may execute its own goal competently, but the collective result will not resemble the intended strategy.`, fr: `Les objectifs sont mal construits ET les équipes ne peuvent pas se coordonner pour les atteindre. Les ambitions stratégiques se fracturent en efforts fonctionnels déconnectés sans mécanisme de coordination pour les rassembler.` },
   dimensions: `D3, D4`,
   traits: `TRT_ED, TRT_CI, TRT_SA`,
  },
  'PAT_PS': {
   name: { en: `The Phantom Steering Wheel`, fr: `Le Pilotage Fantôme` },
+  severity: 'Medium',
   interpretation: { en: `Goals may be partially reasonable, but the reporting system cannot track whether they're being achieved. Leaders are steering without visibility — they set a course but cannot tell whether the organisation is following it, drifting off it, or running into obstacles. This creates a false sense of control that collapses when results fail to materialise.`, fr: `Les objectifs sont peut-être partiellement raisonnables, mais le système de reporting ne peut pas suivre s'ils sont atteints. Les dirigeants fixent la direction mais ne peuvent pas voir si l'organisation la suit — créant un faux sentiment de contrôle.` },
   dimensions: `D4, D5`,
   traits: `TRT_II, TRT_ED, TRT_DC`,
  },
  'PAT_SS': {
   name: { en: `Structure Without Soul`, fr: `La Structure Sans Âme` },
+  severity: 'Medium',
   interpretation: { en: `The organisational structure looks right on paper, but people don't understand why it exists or what it's supposed to enable. The design may be well-suited to the strategy, but without meaning-making, people will operate within the new structure using old behaviours — the form changes but the function doesn't.`, fr: `La structure organisationnelle semble correcte sur le papier, mais les collaborateurs ne comprennent pas pourquoi elle existe ni ce qu'elle est censée permettre. La forme change mais la fonction ne suit pas, car personne n'a expliqué pourquoi le nouveau design compte.` },
   dimensions: `D2, D7`,
   traits: `TRT_SA, TRT_II, TRT_CO`,
  },
  'PAT_CG': {
   name: { en: `The Credibility Gap`, fr: `Le Déficit de Crédibilité` },
+  severity: 'Medium',
   interpretation: { en: `The people driving deployment lack influence AND the people expected to execute don't feel ownership. There is nobody with both the authority and the legitimacy to pull execution forward. Deployment exists on paper but has no human engine.`, fr: `Les personnes portant le déploiement manquent d'influence ET les personnes censées exécuter ne ressentent pas d'appropriation. L'autorité formelle sans confiance produit la conformité ; l'influence sans autorité formelle produit de l'impact sans ressources.` },
   dimensions: `D6, D8`,
   traits: `TRT_LI, TRT_CO`,
  },
  'PAT_CU': {
   name: { en: `Capable but Uncalibrated`, fr: `Compétent mais Non Calibré` },
+  severity: 'Medium',
   interpretation: { en: `Leaders have relevant experience but can't diagnose execution problems accurately. They know the domain but misread the organisational dynamics. This creates a leadership team that confidently applies the wrong solutions — and their domain credibility means nobody challenges them until significant damage is done.`, fr: `Les dirigeants ont une expérience pertinente mais ne peuvent pas diagnostiquer les problèmes d'exécution avec précision. Ils connaissent le domaine mais appliquent les mauvaises interventions — créant des solutions confiantes mais inappropriées aux défis d'exécution.` },
   dimensions: `D6`,
   traits: `TRT_CF, TRT_DC`,
  },
  'PAT_ID': {
   name: { en: `The Invisible Drift`, fr: `La Dérive Invisible` },
+  severity: 'High',
   interpretation: { en: `Execution will drift off course gradually and silently. Weak monitoring, weak coordination, and filtered communication mean problems are visible at the working level long before leaders notice. By the time the drift becomes undeniable, significant resources and time have been wasted. This is the most insidious pattern because it creates no alarm until it's too late.`, fr: `Le déploiement dérivera de sa trajectoire graduellement et silencieusement. Un suivi faible, une coordination faible et une communication filtrée signifient que les problèmes sont visibles au niveau opérationnel bien avant que les dirigeants ne s'en aperçoivent. Le temps que la dérive devienne indéniable, des ressources et du temps significatifs auront été gaspillés. C'est le pattern le plus insidieux car il ne crée aucune alarme tant qu'il n'est pas trop tard.` },
   dimensions: `D3, D5, D7`,
   traits: `TRT_II, TRT_AC, TRT_CI`,
  },
  'PAT_FR': {
   name: { en: `The Frozen Middle`, fr: `L'Encadrement Figé` },
+  severity: 'High',
   interpretation: { en: `Middle managers — the people who make or break execution — are not mobilised. They were not meaningfully involved in shaping the approach, they don't fully understand it, and the leaders driving deployment lack the influence to energise them. The top may be committed and the bottom may be willing, but the middle is frozen — and the middle is where strategy becomes action.`, fr: `Les cadres intermédiaires, véritables artisans de l'exécution, ne sont pas mobilisés. Ils n'ont pas été significativement impliqués dans la conception de l'approche, ils ne la comprennent pas pleinement, et les dirigeants portant le déploiement manquent de l'influence pour les dynamiser. Le sommet peut être engagé et la base peut être volontaire, mais le milieu est paralysé — et le milieu est là où la stratégie devient action.` },
   dimensions: `D6, D7, D8`,
   traits: `TRT_CO, TRT_LI, TRT_II`,
  },
  'PAT_IS': {
   name: { en: `Incentive Sabotage`, fr: `Le Sabotage par les Incitations` },
+  severity: 'High',
   interpretation: { en: `Leaders are aligned on the strategy but the reward system pulls the organisation in the opposite direction. People hear the strategic message but see that promotions, bonuses, and recognition still flow to legacy behaviours. In this contest between what leaders say and what the system rewards, the system always wins.`, fr: `Les dirigeants sont alignés sur la stratégie mais le système de récompense tire l'organisation dans la direction opposée. Les collaborateurs entendent le message stratégique mais voient que les promotions, bonus et reconnaissance vont toujours aux comportements hérités. Dans ce concours entre ce que disent les dirigeants et ce que récompense le système, le système gagne toujours.` },
   dimensions: `D6, D8`,
   traits: `TRT_SA, TRT_CO`,
  },
  'PAT_SD': {
   name: { en: `Structural Dissonance`, fr: `La Dissonance Structurelle` },
+  severity: 'Medium',
   interpretation: { en: `Goals are well-constructed but the organisational structure makes them impossible to achieve. Teams know what they are supposed to deliver but lack the structural interfaces to collaborate on shared outcomes. Good goals in a bad structure create frustration.`, fr: `Les objectifs sont bien construits mais la structure organisationnelle rend leur atteinte impossible. Les équipes savent ce qu'elles doivent livrer mais manquent des interfaces structurelles pour collaborer sur des résultats communs. De bons objectifs dans une mauvaise structure créent de la frustration.` },
   dimensions: `D2, D4`,
   traits: `TRT_SA, TRT_CI, TRT_ED`,
  },
  'PAT_LD': {
   name: { en: `Leadership Dissonance`, fr: `La Dissonance du Leadership` },
+  severity: 'Medium-High',
   interpretation: { en: `The strategy has been well-translated and understood throughout the organisation, but the leadership team is misaligned. People below the senior team can see the contradictions between what different leaders prioritise — and well-informed employees are the most dangerous audience for leadership misalignment.`, fr: `La stratégie a été bien traduite et comprise à travers l'organisation, mais l'équipe de leadership est désalignée. Les personnes au-dessous du comité de direction voient les contradictions entre ce que différents dirigeants priorisent — et des employés bien informés sont l'audience la plus dangereuse pour un désalignement du leadership.` },
   dimensions: `D6, D7`,
   traits: `TRT_SA, TRT_II, TRT_CO`,

@@ -219,7 +219,7 @@ export default function ESDApp() {
     const dim = DIMENSIONS.find(d => d.id === ds.dimensionId)
     return { name: dim?.name[lang] ?? '', desc: dim?.description[lang] ?? '', score: Math.round(ds.score) }
   }) ?? []
-  const getGapDetails = () => results?.dimensionScores.filter(ds => ds.score < 40).sort((a, b) => a.score - b.score).slice(0, 3).map(ds => {
+  const getGapDetails = () => results?.dimensionScores.filter(ds => ds.score < 50).sort((a, b) => a.score - b.score).slice(0, 3).map(ds => {
     const dim = DIMENSIONS.find(d => d.id === ds.dimensionId)
     return { name: dim?.name[lang] ?? '', desc: dim?.description[lang] ?? '', score: Math.round(ds.score) }
   }) ?? []
@@ -240,10 +240,21 @@ export default function ESDApp() {
   }
   const getOrbInterp = () => ORB_BANDS[results?.overallBand ?? 'amber']?.interpretation?.[lang] ?? ''
 
+  // Severity-sorted top-N helpers (High > Medium-High > Medium)
+  const SEVERITY_RANK: Record<string, number> = { 'High': 3, 'Medium-High': 2, 'Medium': 1 }
+  const getTopPatterns = (n: number) => (results?.firedPatterns ?? [])
+    .slice()
+    .sort((a, b) => (SEVERITY_RANK[PATTERNS[b.patternId]?.severity ?? 'Medium'] ?? 0) - (SEVERITY_RANK[PATTERNS[a.patternId]?.severity ?? 'Medium'] ?? 0))
+    .slice(0, n)
+  const getTopFailureModes = (n: number) => (results?.firedFailureModes ?? [])
+    .slice()
+    .sort((a, b) => (SEVERITY_RANK[FAILURE_MODES[b.failureModeId]?.severity ?? 'Medium'] ?? 0) - (SEVERITY_RANK[FAILURE_MODES[a.failureModeId]?.severity ?? 'Medium'] ?? 0))
+    .slice(0, n)
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className={`min-h-screen ${step === 'dashboard' ? 'bg-slate-50' : 'bg-white'}`}>
       {/* Nav */}
-      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100">
+      <nav className={`sticky top-0 z-50 backdrop-blur border-b border-gray-100 ${step === 'dashboard' ? 'bg-slate-50/95' : 'bg-white/95'}`}>
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src="/icon.svg" alt="" className="w-7 h-7" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
@@ -356,7 +367,6 @@ export default function ESDApp() {
               <p className="text-xs font-semibold uppercase tracking-[0.15em]" style={{ color: BRAND.teal }}>{t.overallScore}</p>
               <div className="flex justify-center"><ScoreGauge score={results.overallScore} band={results.overallBand} /></div>
               <BandBadge band={results.overallBand} lang={lang} />
-              <p className="text-sm text-white/50 leading-relaxed max-w-xl mx-auto">{getOrbInterp()}</p>
             </div>
 
             {/* Executive Summary */}
@@ -364,7 +374,7 @@ export default function ESDApp() {
               <div className="px-6 py-4 border-b border-gray-100">
                 <h2 className="text-xs font-semibold text-ink/40 uppercase tracking-widest">{t.executiveSummary}</h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+              <div className="divide-y divide-gray-100">
                 <div className="p-6 space-y-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wide flex items-center gap-2" style={{ color: BRAND.teal }}>
@@ -395,8 +405,8 @@ export default function ESDApp() {
                     </p>
                     <p className="text-xs text-ink/30 mt-1.5 leading-relaxed">{t.primaryTensionExplain}</p>
                   </div>
-                  {results.firedPatterns.length > 0
-                    ? <div><p className="text-sm text-ink font-medium">{PATTERNS[results.firedPatterns[0].patternId]?.name[lang]}</p><p className="text-xs text-ink/40 mt-0.5 leading-relaxed">{PATTERNS[results.firedPatterns[0].patternId]?.interpretation[lang]?.substring(0, 200)}...</p></div>
+                  {getTopPatterns(1).length > 0
+                    ? <div><p className="text-sm text-ink font-medium">{PATTERNS[getTopPatterns(1)[0].patternId]?.name[lang]}</p><p className="text-xs text-ink/40 mt-0.5 leading-relaxed">{PATTERNS[getTopPatterns(1)[0].patternId]?.interpretation[lang]}</p></div>
                     : <p className="text-sm text-ink/30 italic">{t.noTensions}</p>}
                 </div>
               </div>
@@ -436,23 +446,23 @@ export default function ESDApp() {
 
             {/* Structural Tensions + Failure Modes — below Dimension Assessment */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="rounded-xl border-2 border-rose bg-rose-50 p-5">
-                <h3 className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: BRAND.rose }}>{t.patternsDetected}</h3>
-                {results.firedPatterns.length === 0 ? <p className="text-sm text-ink/30 italic">{t.noneDetected}</p> : (
-                  <ul className="space-y-3">{results.firedPatterns.map(p => {
+              <div className="rounded-xl border-2 border-rose bg-rose-50 p-6 shadow-sm">
+                <h3 className="text-sm font-semibold uppercase tracking-wide mb-4" style={{ color: BRAND.rose }}>{t.patternsDetected}</h3>
+                {getTopPatterns(3).length === 0 ? <p className="text-sm text-ink/30 italic">{t.noneDetected}</p> : (
+                  <ul className="space-y-4">{getTopPatterns(3).map(p => {
                     const pat = PATTERNS[p.patternId]; return (
                       <li key={p.patternId}><p className="text-sm font-semibold" style={{ color: BRAND.ink }}>{pat?.name[lang]}</p>
-                        <p className="text-xs text-ink/40 mt-1 leading-relaxed">{pat?.interpretation[lang]?.substring(0, 120)}...</p></li>
+                        <p className="text-xs text-ink/50 mt-1 leading-relaxed">{pat?.interpretation[lang]}</p></li>
                   )})}</ul>
                 )}
               </div>
-              <div className="rounded-xl border-2 border-orange bg-orange-50 p-5">
-                <h3 className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: BRAND.orange }}>{t.failureModesTriggered}</h3>
-                {results.firedFailureModes.length === 0 ? <p className="text-sm text-ink/30 italic">{t.noneDetected}</p> : (
-                  <ul className="space-y-3">{results.firedFailureModes.map(f => {
+              <div className="rounded-xl border-2 border-orange bg-orange-50 p-6 shadow-sm">
+                <h3 className="text-sm font-semibold uppercase tracking-wide mb-4" style={{ color: BRAND.orange }}>{t.failureModesTriggered}</h3>
+                {getTopFailureModes(3).length === 0 ? <p className="text-sm text-ink/30 italic">{t.noneDetected}</p> : (
+                  <ul className="space-y-4">{getTopFailureModes(3).map(f => {
                     const fm = FAILURE_MODES[f.failureModeId]; return (
                       <li key={f.failureModeId}><p className="text-sm font-semibold" style={{ color: BRAND.ink }}>{fm?.name[lang]}</p>
-                        <p className="text-xs text-ink/40 mt-1 leading-relaxed">{fm?.description[lang]?.substring(0, 120)}...</p></li>
+                        <p className="text-xs text-ink/50 mt-1 leading-relaxed">{fm?.description[lang]}</p></li>
                   )})}</ul>
                 )}
               </div>
