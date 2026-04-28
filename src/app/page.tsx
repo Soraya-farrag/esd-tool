@@ -285,12 +285,11 @@ export default function ESDApp() {
                 style={{ backgroundColor: BRAND.purple }}>
                 {t.startButton}
               </button>
-              <p className="text-xs text-ink/35">19 questions · ~12 minutes</p>
+              <p className="text-xs text-ink/35">19 questions</p>
               {/* When to use cards */}
               <div className="grid grid-cols-3 gap-4 pt-4">
                 {[
                   { en: 'Before deployment', fr: 'Avant le d\u00e9ploiement', enSub: 'Know where the gaps are before you launch.', frSub: 'Identifiez les \u00e9carts avant le lancement.' },
-                  { en: 'Before planning', fr: 'Avant la planification', enSub: 'Understand which systems need strengthening first.', frSub: 'Comprenez quels syst\u00e8mes renforcer en priorit\u00e9.' },
                   { en: 'At leadership transition', fr: 'En transition de leadership', enSub: 'Get a structured baseline of what you inherit.', frSub: 'Obtenez un diagnostic structur\u00e9 de l\u2019existant.' },
                 ].map((card, i) => (
                   <div key={i} className="space-y-2">
