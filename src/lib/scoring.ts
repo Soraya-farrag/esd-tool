@@ -209,7 +209,7 @@ export function computeTraitScores(
         else { tMax += alloc * 0.0; tMin += alloc * (-1.0) }
       }
       const range = tMax - tMin
-      if (range === 0) return
+      if (range === 0) continue
       contributions.push(Math.max(0, Math.min(100, 100 * (raw - tMin) / range)))
     }
     const avg = contributions.length > 0
