@@ -61,6 +61,11 @@ export const translations = {
     senior: 'Senior team',
     nextLayer: 'Next layer',
     gap: 'Gap',
+    topStructuralTension: 'TOP STRUCTURAL TENSION',
+    topExecutionRisk: 'TOP EXECUTION RISK',
+    severityHigh: 'HIGH SEVERITY',
+    severityMediumHigh: 'MEDIUM-HIGH SEVERITY',
+    severityMedium: 'MEDIUM SEVERITY',
   },
   fr: {
     toolName: 'Scan du Syst\u00e8me d\u2019Ex\u00e9cution',
@@ -120,6 +125,11 @@ export const translations = {
     senior: '\u00c9quipe dirigeante',
     nextLayer: 'Niveau suivant',
     gap: '\u00c9cart',
+    topStructuralTension: 'TENSION STRUCTURELLE PRINCIPALE',
+    topExecutionRisk: 'RISQUE D\u2019EX\u00c9CUTION PRINCIPAL',
+    severityHigh: 'S\u00c9V\u00c9RIT\u00c9 \u00c9LEV\u00c9E',
+    severityMediumHigh: 'S\u00c9V\u00c9RIT\u00c9 MOYENNE-\u00c9LEV\u00c9E',
+    severityMedium: 'S\u00c9V\u00c9RIT\u00c9 MOYENNE',
   },
 } as const
 

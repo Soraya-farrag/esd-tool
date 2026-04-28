@@ -25,8 +25,8 @@ function ScoreGauge({ score, band, size = 180 }: { score: number; band: Band; si
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="6" />
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={BRAND.teal} strokeWidth="6"
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="3" />
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={BRAND.teal} strokeWidth="3"
           strokeDasharray={circ} strokeDashoffset={circ - prog}
           strokeLinecap="round" className="transition-all duration-1000 ease-out" />
       </svg>
@@ -48,10 +48,10 @@ function BandBadge({ band, lang }: { band: Band; lang: Lang }) {
 }
 
 // ── RAG helpers for dimension cards ──
-function getDimRAG(score: number): { border: string; bg: string; label: string; labelColor: string } {
-  if (score >= 61) return { border: 'border-teal', bg: 'bg-teal-50', label: 'Strong', labelColor: 'text-teal' }
-  if (score >= 41) return { border: 'border-orange', bg: 'bg-orange-50', label: 'Moderate', labelColor: 'text-orange' }
-  return { border: 'border-rose', bg: 'bg-rose-50', label: 'Weak', labelColor: 'text-rose' }
+function getDimRAG(score: number): { border: string; bg: string; label: string; labelColor: string; hex: string } {
+  if (score >= 61) return { border: 'border-teal', bg: 'bg-teal-50', label: 'Strong', labelColor: 'text-teal', hex: '#0DCBC4' }
+  if (score >= 41) return { border: 'border-orange', bg: 'bg-orange-50', label: 'Moderate', labelColor: 'text-orange', hex: '#F79F20' }
+  return { border: 'border-rose', bg: 'bg-rose-50', label: 'Weak', labelColor: 'text-rose', hex: '#E8466A' }
 }
 function getDimRAGFr(score: number): string {
   if (score >= 61) return 'Solide'
@@ -376,35 +376,26 @@ export default function ESDApp() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
                 <div className="p-6 space-y-3">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide flex items-center gap-2" style={{ color: BRAND.teal }}>
-                      <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs text-white" style={{ backgroundColor: BRAND.teal }}>{'\u2713'}</span>
-                      {t.strengths}
-                    </p>
-                    <p className="text-xs text-ink/30 mt-1.5 leading-relaxed">{t.strengthsExplain}</p>
-                  </div>
+                  <p className="text-xs font-semibold uppercase tracking-wide flex items-center gap-2" style={{ color: BRAND.teal }}>
+                    <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs text-white" style={{ backgroundColor: BRAND.teal }}>{'\u2713'}</span>
+                    {t.strengths}
+                  </p>
                   {getStrengthDetails().length > 0 ? <ul className="space-y-2">{getStrengthDetails().map((s, i) => <li key={i}><p className="text-sm text-ink font-medium">{s.name} ({s.score})</p><p className="text-xs text-ink/40 mt-0.5 leading-relaxed">{s.desc}</p></li>)}</ul>
                     : <p className="text-sm text-ink/30 italic">{t.noStrengths}</p>}
                 </div>
                 <div className="p-6 space-y-3">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide flex items-center gap-2" style={{ color: BRAND.orange }}>
-                      <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs text-white" style={{ backgroundColor: BRAND.orange }}>{'\u26a0'}</span>
-                      {t.priorityGaps}
-                    </p>
-                    <p className="text-xs text-ink/30 mt-1.5 leading-relaxed">{t.priorityGapsExplain}</p>
-                  </div>
+                  <p className="text-xs font-semibold uppercase tracking-wide flex items-center gap-2" style={{ color: BRAND.orange }}>
+                    <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs text-white" style={{ backgroundColor: BRAND.orange }}>{'\u26a0'}</span>
+                    {t.priorityGaps}
+                  </p>
                   {getGapDetails().length > 0 ? <ul className="space-y-2">{getGapDetails().map((s, i) => <li key={i}><p className="text-sm text-ink font-medium">{s.name} ({s.score})</p><p className="text-xs text-ink/40 mt-0.5 leading-relaxed">{s.desc}</p></li>)}</ul>
                     : <p className="text-sm text-ink/30 italic">{t.noGaps}</p>}
                 </div>
                 <div className="p-6 space-y-3">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide flex items-center gap-2" style={{ color: BRAND.purple }}>
-                      <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs text-white" style={{ backgroundColor: BRAND.purple }}>{'\u2192'}</span>
-                      {t.primaryTension}
-                    </p>
-                    <p className="text-xs text-ink/30 mt-1.5 leading-relaxed">{t.primaryTensionExplain}</p>
-                  </div>
+                  <p className="text-xs font-semibold uppercase tracking-wide flex items-center gap-2" style={{ color: BRAND.purple }}>
+                    <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs text-white" style={{ backgroundColor: BRAND.purple }}>{'\u2192'}</span>
+                    {t.primaryTension}
+                  </p>
                   {getTopPatterns(1).length > 0
                     ? <div><p className="text-sm text-ink font-medium">{PATTERNS[getTopPatterns(1)[0].patternId]?.name[lang]}</p><p className="text-xs text-ink/40 mt-0.5 leading-relaxed">{PATTERNS[getTopPatterns(1)[0].patternId]?.interpretation[lang]}</p></div>
                     : <p className="text-sm text-ink/30 italic">{t.noTensions}</p>}
@@ -419,25 +410,43 @@ export default function ESDApp() {
                   {results.dimensionScores.map(ds => {
                     const dim = DIMENSIONS.find(d => d.id === ds.dimensionId); if (!dim) return null
                     const rag = getDimRAG(ds.score)
+                    const hasDA = dim.hasDesignAdoption && ds.designScore !== undefined && ds.adoptionScore !== undefined
+                    const designPct = hasDA ? Math.max(0, Math.min(100, ds.designScore!)) : 0
+                    const adoptionPct = hasDA ? Math.max(0, Math.min(100, ds.adoptionScore!)) : 0
+                    const fillPct = hasDA ? Math.min(designPct, adoptionPct) : Math.max(0, Math.min(100, ds.score))
                     return (
-                      <div key={ds.dimensionId} className={`rounded-xl border-2 ${rag.border} ${rag.bg} p-5 transition hover:shadow-md`}>
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <p className="font-semibold text-sm" style={{ color: BRAND.ink }}>{dim.name[lang]}</p>
-                            <p className="text-xs text-ink/35 mt-0.5">{dim.system === 'Structural' ? t.structuralSystem : t.socialSystem} · {Math.round(dim.weight * 100)}%</p>
-                          </div>
-                          <span className="text-2xl font-bold" style={{ color: BRAND.ink }}>{Math.round(ds.score)}</span>
+                      <div key={ds.dimensionId} className={`rounded-xl border-2 ${rag.border} bg-white p-5 transition hover:shadow-md`}>
+                        <div className="flex items-start justify-between mb-1">
+                          <p className="font-semibold text-sm pr-4" style={{ color: BRAND.ink }}>{dim.name[lang]}</p>
+                          <span className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: rag.hex }} />
                         </div>
-                        {dim.hasDesignAdoption && ds.designScore !== undefined && ds.adoptionScore !== undefined && (
-                          <div className="flex items-center gap-4 mb-2">
-                            <span className="text-xs text-ink/40">{t.design}: {Math.round(ds.designScore)}</span>
-                            <span className="text-xs text-ink/40">{t.adoption}: {Math.round(ds.adoptionScore)}</span>
+                        <p className="text-xs text-ink/35 mb-3">{dim.system === 'Structural' ? t.structuralSystem : t.socialSystem} · {Math.round(dim.weight * 100)}%</p>
+                        <div className="flex items-end justify-between mb-3">
+                          <span className="text-3xl font-bold leading-none" style={{ color: BRAND.ink }}>{Math.round(ds.score)}</span>
+                          <p className={`text-xs font-bold ${rag.labelColor}`}>{lang === 'en' ? rag.label : getDimRAGFr(ds.score)}</p>
+                        </div>
+                        <div className="relative w-full h-1.5 bg-gray-100 rounded-full overflow-visible mb-1">
+                          <div className="absolute top-0 left-0 h-full rounded-full transition-all duration-700" style={{ width: `${fillPct}%`, backgroundColor: rag.hex }} />
+                          {hasDA && (
+                            <>
+                              <span className="absolute top-1/2 -translate-y-1/2 w-0.5 h-3 rounded-sm" style={{ left: `calc(${designPct}% - 1px)`, backgroundColor: '#4587C9' }} title={`${t.design}: ${Math.round(designPct)}`} />
+                              <span className="absolute top-1/2 -translate-y-1/2 w-0.5 h-3 rounded-sm" style={{ left: `calc(${adoptionPct}% - 1px)`, backgroundColor: '#D1406C' }} title={`${t.adoption}: ${Math.round(adoptionPct)}`} />
+                            </>
+                          )}
+                        </div>
+                        {hasDA && (
+                          <div className="flex items-center gap-4 mt-2">
+                            <span className="inline-flex items-center gap-1.5 text-xs text-ink/45">
+                              <span className="w-2 h-2 rounded-sm" style={{ backgroundColor: '#4587C9' }} />
+                              {t.design}: {Math.round(designPct)}
+                            </span>
+                            <span className="inline-flex items-center gap-1.5 text-xs text-ink/45">
+                              <span className="w-2 h-2 rounded-sm" style={{ backgroundColor: '#D1406C' }} />
+                              {t.adoption}: {Math.round(adoptionPct)}
+                            </span>
                           </div>
                         )}
-                        <div className="flex items-center justify-between">
-                          {ds.varianceFlag === 'High Variance' && <p className="text-xs font-medium" style={{ color: BRAND.orange }}>{t.highVariance}</p>}
-                          <p className={`text-xs font-bold ml-auto ${rag.labelColor}`}>{lang === 'en' ? rag.label : getDimRAGFr(ds.score)}</p>
-                        </div>
+                        {ds.varianceFlag === 'High Variance' && <p className="text-xs font-medium mt-2" style={{ color: BRAND.orange }}>{t.highVariance}</p>}
                       </div>
                     )
                   })}
@@ -446,25 +455,47 @@ export default function ESDApp() {
 
             {/* Structural Tensions + Failure Modes — below Dimension Assessment */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="rounded-xl border-2 bg-[#D1406C]/10 p-6 shadow-sm" style={{ borderColor: '#D1406C' }}>
-                <h3 className="text-sm font-semibold uppercase tracking-wide mb-4" style={{ color: '#D1406C' }}>{t.patternsDetected}</h3>
-                {getTopPatterns(3).length === 0 ? <p className="text-sm text-ink/30 italic">{t.noneDetected}</p> : (
-                  <ul className="space-y-4">{getTopPatterns(3).map(p => {
-                    const pat = PATTERNS[p.patternId]; return (
-                      <li key={p.patternId}><p className="text-sm font-semibold" style={{ color: BRAND.ink }}>{pat?.name[lang]}</p>
-                        <p className="text-xs text-ink/50 mt-1 leading-relaxed">{pat?.interpretation[lang]}</p></li>
-                  )})}</ul>
-                )}
+              <div>
+                <h3 className="flex items-center gap-2 text-sm font-semibold mb-3" style={{ color: BRAND.ink }}>
+                  <span style={{ color: BRAND.rose }}>{'\u26a0'}</span>
+                  {t.topStructuralTension}
+                </h3>
+                <div className="rounded-xl border-2 border-rose bg-rose-50 p-6 shadow-sm">
+                  {getTopPatterns(1).length === 0 ? <p className="text-sm text-ink/30 italic">{t.noneDetected}</p> : (() => {
+                    const p = getTopPatterns(1)[0]
+                    const pat = PATTERNS[p.patternId]
+                    if (!pat) return null
+                    const sevLabel = pat.severity === 'High' ? t.severityHigh : pat.severity === 'Medium-High' ? t.severityMediumHigh : t.severityMedium
+                    return (
+                      <>
+                        <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: BRAND.rose }}>{sevLabel}</p>
+                        <p className="text-base font-bold mb-2" style={{ color: BRAND.ink }}>{pat.name[lang]}</p>
+                        <p className="text-sm text-ink/60 leading-relaxed">{pat.interpretation[lang]}</p>
+                      </>
+                    )
+                  })()}
+                </div>
               </div>
-              <div className="rounded-xl border-2 bg-[#4587C9]/10 p-6 shadow-sm" style={{ borderColor: '#4587C9' }}>
-                <h3 className="text-sm font-semibold uppercase tracking-wide mb-4" style={{ color: '#4587C9' }}>{t.failureModesTriggered}</h3>
-                {getTopFailureModes(3).length === 0 ? <p className="text-sm text-ink/30 italic">{t.noneDetected}</p> : (
-                  <ul className="space-y-4">{getTopFailureModes(3).map(f => {
-                    const fm = FAILURE_MODES[f.failureModeId]; return (
-                      <li key={f.failureModeId}><p className="text-sm font-semibold" style={{ color: BRAND.ink }}>{fm?.name[lang]}</p>
-                        <p className="text-xs text-ink/50 mt-1 leading-relaxed">{fm?.description[lang]}</p></li>
-                  )})}</ul>
-                )}
+              <div>
+                <h3 className="flex items-center gap-2 text-sm font-semibold mb-3" style={{ color: BRAND.ink }}>
+                  <span style={{ color: BRAND.orange }}>{'\u26a0'}</span>
+                  {t.topExecutionRisk}
+                </h3>
+                <div className="rounded-xl border-2 border-orange bg-orange-50 p-6 shadow-sm">
+                  {getTopFailureModes(1).length === 0 ? <p className="text-sm text-ink/30 italic">{t.noneDetected}</p> : (() => {
+                    const f = getTopFailureModes(1)[0]
+                    const fm = FAILURE_MODES[f.failureModeId]
+                    if (!fm) return null
+                    const sevLabel = fm.severity === 'High' ? t.severityHigh : fm.severity === 'Medium-High' ? t.severityMediumHigh : t.severityMedium
+                    return (
+                      <>
+                        <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: BRAND.orange }}>{sevLabel}</p>
+                        <p className="text-base font-bold mb-2" style={{ color: BRAND.ink }}>{fm.name[lang]}</p>
+                        <p className="text-sm text-ink/60 leading-relaxed">{fm.description[lang]}</p>
+                      </>
+                    )
+                  })()}
+                </div>
               </div>
             </div>
 
