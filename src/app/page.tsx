@@ -320,12 +320,12 @@ export default function ESDApp() {
             <h2 className="text-xl font-bold leading-relaxed" style={{ color: BRAND.ink }}>{currentQuestion.text[lang]}</h2>
             <div className="space-y-1">
               <p className="text-sm font-semibold text-ink/60 uppercase tracking-wide">{t.rankInstruction}</p>
-              <p className="text-xs text-ink/35">{t.rankHint}</p>
+              {t.rankHint && <p className="text-xs text-ink/35">{t.rankHint}</p>}
             </div>
             <DragRankCards rankedIds={rankedIds} statements={currentQuestion.statements} lang={lang} t={t} onReorder={setRankedIds} />
             <div className="space-y-3 pt-2">
               <h3 className="text-sm font-semibold text-ink/60 uppercase tracking-wide">{t.contextLabel}</h3>
-              <p className="text-xs text-ink/35 leading-relaxed">{t.contextHelper}</p>
+              {t.contextHelper && <p className="text-xs text-ink/35 leading-relaxed">{t.contextHelper}</p>}
               <textarea value={contextText} onChange={(e) => setContextText(e.target.value)} placeholder={t.contextPlaceholder}
                 className="w-full h-28 rounded-xl border border-gray-200 p-4 text-sm text-ink resize-none focus:outline-none focus:ring-2 focus:ring-purple/30 bg-white" />
             </div>
