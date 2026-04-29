@@ -408,39 +408,54 @@ export default function ESDApp() {
               )
             })()}
 
-            {/* Executive Summary */}
-            <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-100">
-                <h2 className="text-xs font-semibold text-ink/40 uppercase tracking-widest">{t.executiveSummary}</h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
-                <div className="p-6 space-y-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide flex items-center gap-2" style={{ color: BRAND.teal }}>
-                    <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs text-white" style={{ backgroundColor: BRAND.teal }}>{'\u2713'}</span>
-                    {t.strengths}
-                  </p>
-                  {getStrengthDetails().length > 0 ? <ul className="space-y-2">{getStrengthDetails().map((s, i) => <li key={i}><p className="text-sm text-ink font-medium">{s.name} ({s.score})</p><p className="text-xs text-ink/40 mt-0.5 leading-relaxed">{s.desc}</p></li>)}</ul>
-                    : <p className="text-sm text-ink/30 italic">{t.noStrengths}</p>}
+            {/* Executive Summary — refined editorial readout */}
+            {(() => {
+              const strengths = getStrengthDetails().slice(0, 2)
+              const gaps = getGapDetails().slice(0, 2)
+              const topPattern = getTopPatterns(1)[0]
+              const pat = topPattern ? PATTERNS[topPattern.patternId] : undefined
+              const firstSentence = (s?: string) => {
+                if (!s) return ''
+                const m = s.match(/^[^.!?]*[.!?]/)
+                return m ? m[0].trim() : s.trim()
+              }
+              const joinNames = (items: { name: string }[]) =>
+                items.length === 0 ? '' : items.length === 1 ? items[0].name : `${items[0].name} ${lang === 'fr' ? 'et' : 'and'} ${items[1].name}`
+              const showStrengths = strengths.length > 0
+              const showGaps = gaps.length > 0
+              const showTension = !!pat
+              const allEmpty = !showStrengths && !showGaps && !showTension
+              const colonSep = lang === 'fr' ? '\u00a0:' : ':'
+              return (
+                <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '16px', padding: '20px' }}>
+                  <h2 style={{ fontSize: '9px', fontWeight: 700, color: '#151D33', letterSpacing: '2px', marginBottom: '12px' }}>{t.executiveSummary.toUpperCase()}</h2>
+                  {allEmpty ? (
+                    <p style={{ fontSize: '13px', fontWeight: 400, color: '#6B7280', lineHeight: 1.65 }}>{t.executiveFallback}</p>
+                  ) : (
+                    <div className="flex flex-col" style={{ gap: '8px' }}>
+                      {showStrengths && (
+                        <p style={{ fontSize: '13px', fontWeight: 400, color: '#374151', lineHeight: 1.65 }}>
+                          <span style={{ color: '#0DCBC4', fontWeight: 700 }}>{'\u2713 '}{t.strengths}{colonSep}</span>{' '}
+                          {joinNames(strengths)} {t.strengthsTrailing}
+                        </p>
+                      )}
+                      {showGaps && (
+                        <p style={{ fontSize: '13px', fontWeight: 400, color: '#374151', lineHeight: 1.65 }}>
+                          <span style={{ color: '#C14B6C', fontWeight: 700 }}>{'\u26a0 '}{t.priorityGaps}{colonSep}</span>{' '}
+                          {joinNames(gaps)} {t.priorityGapsTrailing}
+                        </p>
+                      )}
+                      {showTension && pat && (
+                        <p style={{ fontSize: '13px', fontWeight: 400, color: '#374151', lineHeight: 1.65 }}>
+                          <span style={{ color: '#F79F20', fontWeight: 700 }}>{'\u2192 '}{t.primaryTension}{colonSep}</span>{' '}
+                          {pat.name[lang]} {'\u2014'} {firstSentence(pat.interpretation[lang])}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <div className="p-6 space-y-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide flex items-center gap-2" style={{ color: BRAND.orange }}>
-                    <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs text-white" style={{ backgroundColor: BRAND.orange }}>{'\u26a0'}</span>
-                    {t.priorityGaps}
-                  </p>
-                  {getGapDetails().length > 0 ? <ul className="space-y-2">{getGapDetails().map((s, i) => <li key={i}><p className="text-sm text-ink font-medium">{s.name} ({s.score})</p><p className="text-xs text-ink/40 mt-0.5 leading-relaxed">{s.desc}</p></li>)}</ul>
-                    : <p className="text-sm text-ink/30 italic">{t.noGaps}</p>}
-                </div>
-                <div className="p-6 space-y-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide flex items-center gap-2" style={{ color: BRAND.purple }}>
-                    <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs text-white" style={{ backgroundColor: BRAND.purple }}>{'\u2192'}</span>
-                    {t.primaryTension}
-                  </p>
-                  {getTopPatterns(1).length > 0
-                    ? <div><p className="text-sm text-ink font-medium">{PATTERNS[getTopPatterns(1)[0].patternId]?.name[lang]}</p><p className="text-xs text-ink/40 mt-0.5 leading-relaxed">{PATTERNS[getTopPatterns(1)[0].patternId]?.interpretation[lang]}</p></div>
-                    : <p className="text-sm text-ink/30 italic">{t.noTensions}</p>}
-                </div>
-              </div>
-            </div>
+              )
+            })()}
 
             {/* Dimension Assessment */}
             <div>
