@@ -17,22 +17,32 @@ const BRAND = {
   rose: '#E8466A',
 }
 
-// ── Score Gauge (gray track, teal fill, white number on dark bg) ──
-function ScoreGauge({ score, band, size = 180 }: { score: number; band: Band; size?: number }) {
-  const r = (size - 20) / 2
+// ── Score Gauge (band-coloured arc, white number, dark bg) ──
+const ARC_COLOR_BY_BAND: Record<Band, string> = {
+  critical: '#C14B6C',
+  red: '#C14B6C',
+  amber: '#F79F20',
+  yellow: '#0DCBC4',
+  green: '#0DCBC4',
+}
+
+function ScoreGauge({ score, band, size = 130 }: { score: number; band: Band; size?: number }) {
+  const stroke = 10
+  const r = (size - stroke) / 2
   const circ = 2 * Math.PI * r
-  const prog = (score / 100) * circ
+  const prog = (Math.max(0, Math.min(100, score)) / 100) * circ
+  const arcColor = ARC_COLOR_BY_BAND[band]
   return (
-    <div className="relative" style={{ width: size, height: size }}>
+    <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="3" />
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={BRAND.teal} strokeWidth="3"
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#374151" strokeWidth={stroke} />
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={arcColor} strokeWidth={stroke}
           strokeDasharray={circ} strokeDashoffset={circ - prog}
           strokeLinecap="round" className="transition-all duration-1000 ease-out" />
       </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-4xl font-bold text-white">{Math.round(score)}</span>
-        <span className="text-xs text-white/40">/100</span>
+      <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ lineHeight: 1 }}>
+        <span className="font-extrabold text-white" style={{ fontSize: '36px', lineHeight: 1 }}>{Math.round(score)}</span>
+        <span style={{ fontSize: '9px', color: '#9CA3AF', marginTop: '2px' }}>/100</span>
       </div>
     </div>
   )
@@ -362,12 +372,41 @@ export default function ESDApp() {
         {step === 'dashboard' && results && (
           <div className="py-12 space-y-8">
 
-            {/* Score panel — dark ink background */}
-            <div className="rounded-2xl p-8 text-center space-y-4" style={{ backgroundColor: BRAND.ink }}>
-              <p className="text-xs font-semibold uppercase tracking-[0.15em]" style={{ color: BRAND.teal }}>{t.overallScore}</p>
-              <div className="flex justify-center"><ScoreGauge score={results.overallScore} band={results.overallBand} /></div>
-              <BandBadge band={results.overallBand} lang={lang} />
-            </div>
+            {/* Score panel — dark ink background, decorative triangles, horizontal layout */}
+            {(() => {
+              const dimsRequiringDesignAttention = results.dimensionScores.filter(ds =>
+                (ds.designScore !== undefined && ds.designScore < 40) ||
+                (ds.adoptionScore !== undefined && ds.adoptionScore < 40)
+              ).length
+              const arcColor = ARC_COLOR_BY_BAND[results.overallBand]
+              return (
+                <div className="relative overflow-hidden" style={{ backgroundColor: '#151D33', borderRadius: '20px', padding: '28px 32px' }}>
+                  {/* Decorative triangles */}
+                  <svg className="absolute pointer-events-none" style={{ top: 0, right: 0, opacity: 0.08 }} width="180" height="160" viewBox="0 0 180 160" aria-hidden="true">
+                    <polygon points="180,0 180,160 20,0" fill="#CB7CED" />
+                  </svg>
+                  <svg className="absolute pointer-events-none" style={{ bottom: 0, right: 0, opacity: 0.08 }} width="200" height="140" viewBox="0 0 200 140" aria-hidden="true">
+                    <polygon points="200,140 0,140 200,10" fill="#0DCBC4" />
+                  </svg>
+                  {/* Horizontal content row */}
+                  <div className="relative flex items-center" style={{ gap: '28px' }}>
+                    <ScoreGauge score={results.overallScore} band={results.overallBand} />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold uppercase" style={{ fontSize: '9px', letterSpacing: '1.8px', color: arcColor, marginBottom: '6px' }}>{t.overallScore}</p>
+                      <h2 className="text-white font-bold" style={{ fontSize: '22px', letterSpacing: '-0.4px', marginBottom: dimsRequiringDesignAttention > 0 ? '10px' : 0, lineHeight: 1.15 }}>{getBandLabel(results.overallBand, lang)}</h2>
+                      {dimsRequiringDesignAttention > 0 && (
+                        <p style={{ fontSize: '13px', lineHeight: 1.4 }}>
+                          <span style={{ color: '#C14B6C', fontWeight: 600 }}>
+                            {dimsRequiringDesignAttention} {dimsRequiringDesignAttention === 1 ? t.designAttentionSingular : t.designAttentionPlural}
+                          </span>{' '}
+                          <span style={{ color: '#9CA3AF', fontWeight: 400 }}>{t.beforeCascade}</span>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )
+            })()}
 
             {/* Executive Summary */}
             <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden">

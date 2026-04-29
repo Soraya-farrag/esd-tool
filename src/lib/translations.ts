@@ -66,6 +66,9 @@ export const translations = {
     severityHigh: 'HIGH SEVERITY',
     severityMediumHigh: 'MEDIUM-HIGH SEVERITY',
     severityMedium: 'MEDIUM SEVERITY',
+    designAttentionSingular: 'dimension requires design attention',
+    designAttentionPlural: 'dimensions require design attention',
+    beforeCascade: 'before cascade begins',
   },
   fr: {
     toolName: 'Scan du Syst\u00e8me d\u2019Ex\u00e9cution',
@@ -130,6 +133,9 @@ export const translations = {
     severityHigh: 'S\u00c9V\u00c9RIT\u00c9 \u00c9LEV\u00c9E',
     severityMediumHigh: 'S\u00c9V\u00c9RIT\u00c9 MOYENNE-\u00c9LEV\u00c9E',
     severityMedium: 'S\u00c9V\u00c9RIT\u00c9 MOYENNE',
+    designAttentionSingular: 'dimension n\u00e9cessite une attention de conception',
+    designAttentionPlural: 'dimensions n\u00e9cessitent une attention de conception',
+    beforeCascade: 'avant le d\u00e9ploiement',
   },
 } as const
 

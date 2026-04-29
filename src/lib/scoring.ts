@@ -40,8 +40,8 @@ export function getBandLabel(band: Band, lang: 'en' | 'fr'): string {
     critical: { en: 'Critical Risk', fr: 'Risque Critique' },
     red: { en: 'Low Readiness', fr: 'Faible Maturit\u00e9' },
     amber: { en: 'Moderate Readiness', fr: 'Maturit\u00e9 Mod\u00e9r\u00e9e' },
-    yellow: { en: 'Strong Readiness', fr: 'Bonne Maturit\u00e9' },
-    green: { en: 'High Readiness', fr: 'Maturit\u00e9 \u00c9lev\u00e9e' },
+    yellow: { en: 'High Readiness', fr: 'Bonne Maturit\u00e9' },
+    green: { en: 'Very High Readiness', fr: 'Maturit\u00e9 Tr\u00e8s \u00c9lev\u00e9e' },
   }
   return labels[band][lang]
 }
