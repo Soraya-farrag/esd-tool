@@ -459,7 +459,7 @@ export default function ESDApp() {
 
             {/* Dimension Scorecard */}
             <div>
-                <h2 style={{ fontSize: '9px', fontWeight: 700, color: '#151D33', letterSpacing: '2px', marginBottom: '12px' }}>{t.dimensionScorecard.toUpperCase()}</h2>
+                <h2 style={{ fontSize: '13px', fontWeight: 700, color: '#151D33', letterSpacing: '2px', marginBottom: '12px' }}>{t.dimensionScorecard.toUpperCase()}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: '10px' }}>
                   {results.dimensionScores.map(ds => {
                     const dim = DIMENSIONS.find(d => d.id === ds.dimensionId); if (!dim) return null
@@ -494,6 +494,17 @@ export default function ESDApp() {
                       </div>
                     )
                   })}
+                </div>
+                {/* Design / Adoption legend */}
+                <div className="flex items-center" style={{ gap: '16px', marginTop: '12px' }}>
+                  <span style={{ fontSize: '11px', color: '#6B7280', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '2px', height: '9px', backgroundColor: '#4587C9', borderRadius: '2px' }} />
+                    {t.design}
+                  </span>
+                  <span style={{ fontSize: '11px', color: '#6B7280', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ width: '2px', height: '9px', backgroundColor: '#D1406C', borderRadius: '2px' }} />
+                    {t.adoption}
+                  </span>
                 </div>
             </div>
 
