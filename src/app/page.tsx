@@ -58,13 +58,13 @@ function BandBadge({ band, lang }: { band: Band; lang: Lang }) {
 }
 
 // ── RAG helpers for dimension cards ──
-function getDimRAG(score: number): { border: string; bg: string; label: string; labelColor: string; hex: string } {
-  if (score >= 61) return { border: 'border-teal', bg: 'bg-teal-50', label: 'Strong', labelColor: 'text-teal', hex: '#0DCBC4' }
-  if (score >= 41) return { border: 'border-orange', bg: 'bg-orange-50', label: 'Moderate', labelColor: 'text-orange', hex: '#F79F20' }
-  return { border: 'border-rose', bg: 'bg-rose-50', label: 'Weak', labelColor: 'text-rose', hex: '#E8466A' }
+function getDimRAG(score: number): { borderHex: string; bgHex: string; dotHex: string; barHex: string; label: string; labelHex: string } {
+  if (score >= 61) return { borderHex: '#0DCBC4', bgHex: '#E8FFFE', dotHex: '#0DCBC4', barHex: '#0DCBC4', label: 'Strong', labelHex: '#0B9E98' }
+  if (score >= 41) return { borderHex: '#F79F20', bgHex: '#FEF4E3', dotHex: '#F79F20', barHex: '#F79F20', label: 'Moderate', labelHex: '#A8640A' }
+  return { borderHex: '#C14B6C', bgHex: '#FAEAEE', dotHex: '#C14B6C', barHex: '#C14B6C', label: 'Weak', labelHex: '#8B1F3E' }
 }
 function getDimRAGFr(score: number): string {
-  if (score >= 61) return 'Solide'
+  if (score >= 61) return 'Fort'
   if (score >= 41) return 'Mod\u00e9r\u00e9'
   return 'Faible'
 }
@@ -428,7 +428,7 @@ export default function ESDApp() {
               const colonSep = lang === 'fr' ? '\u00a0:' : ':'
               return (
                 <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '16px', padding: '20px' }}>
-                  <h2 style={{ fontSize: '9px', fontWeight: 700, color: '#151D33', letterSpacing: '2px', marginBottom: '12px' }}>{t.executiveSummary.toUpperCase()}</h2>
+                  <h2 style={{ fontSize: '13px', fontWeight: 700, color: '#151D33', letterSpacing: '2px', marginBottom: '12px' }}>{t.executiveSummary.toUpperCase()}</h2>
                   {allEmpty ? (
                     <p style={{ fontSize: '13px', fontWeight: 400, color: '#6B7280', lineHeight: 1.65 }}>{t.executiveFallback}</p>
                   ) : (
@@ -457,10 +457,10 @@ export default function ESDApp() {
               )
             })()}
 
-            {/* Dimension Assessment */}
+            {/* Dimension Scorecard */}
             <div>
-                <h2 className="text-xs font-semibold text-ink/40 uppercase tracking-widest mb-4">{t.dimensionScores}</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <h2 style={{ fontSize: '9px', fontWeight: 700, color: '#151D33', letterSpacing: '2px', marginBottom: '12px' }}>{t.dimensionScorecard.toUpperCase()}</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: '10px' }}>
                   {results.dimensionScores.map(ds => {
                     const dim = DIMENSIONS.find(d => d.id === ds.dimensionId); if (!dim) return null
                     const rag = getDimRAG(ds.score)
@@ -468,39 +468,29 @@ export default function ESDApp() {
                     const designPct = hasDA ? Math.max(0, Math.min(100, ds.designScore!)) : 0
                     const adoptionPct = hasDA ? Math.max(0, Math.min(100, ds.adoptionScore!)) : 0
                     const fillPct = hasDA ? Math.min(designPct, adoptionPct) : Math.max(0, Math.min(100, ds.score))
+                    const ragLabel = lang === 'en' ? rag.label : getDimRAGFr(ds.score)
                     return (
-                      <div key={ds.dimensionId} className={`rounded-xl border-2 ${rag.border} bg-white p-5 transition hover:shadow-md`}>
-                        <div className="flex items-start justify-between mb-1">
-                          <p className="font-semibold text-sm pr-4" style={{ color: BRAND.ink }}>{dim.name[lang]}</p>
-                          <span className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: rag.hex }} />
+                      <div key={ds.dimensionId} style={{ border: `2px solid ${rag.borderHex}`, backgroundColor: rag.bgHex, borderRadius: '12px', padding: '14px' }}>
+                        {/* Top row: name + dot */}
+                        <div className="flex items-center justify-between" style={{ marginBottom: '8px' }}>
+                          <p style={{ fontSize: '11px', fontWeight: 600, color: '#6B7280', paddingRight: '8px' }}>{dim.name[lang]}</p>
+                          <span style={{ width: '8px', height: '8px', borderRadius: '999px', backgroundColor: rag.dotHex, flexShrink: 0 }} />
                         </div>
-                        <p className="text-xs text-ink/35 mb-3">{dim.system === 'Structural' ? t.structuralSystem : t.socialSystem} · {Math.round(dim.weight * 100)}%</p>
-                        <div className="flex items-end justify-between mb-3">
-                          <span className="text-3xl font-bold leading-none" style={{ color: BRAND.ink }}>{Math.round(ds.score)}</span>
-                          <p className={`text-xs font-bold ${rag.labelColor}`}>{lang === 'en' ? rag.label : getDimRAGFr(ds.score)}</p>
+                        {/* Middle row: score + RAG label */}
+                        <div className="flex items-end justify-between" style={{ marginBottom: '8px' }}>
+                          <span style={{ fontSize: '28px', fontWeight: 800, color: '#151D33', lineHeight: 1 }}>{Math.round(ds.score)}</span>
+                          <span style={{ fontSize: '11px', fontWeight: 600, color: rag.labelHex }}>{ragLabel}</span>
                         </div>
-                        <div className="relative w-full h-1.5 bg-gray-100 rounded-full overflow-visible mb-1">
-                          <div className="absolute top-0 left-0 h-full rounded-full transition-all duration-700" style={{ width: `${fillPct}%`, backgroundColor: rag.hex }} />
+                        {/* Integrated dual-level progress bar */}
+                        <div className="relative w-full overflow-hidden" style={{ height: '5px', backgroundColor: 'rgba(255,255,255,0.65)', borderRadius: '99px' }}>
+                          <div className="absolute top-0 left-0 h-full transition-all duration-700" style={{ width: `${fillPct}%`, backgroundColor: rag.barHex, borderRadius: '99px' }} />
                           {hasDA && (
                             <>
-                              <span className="absolute top-1/2 -translate-y-1/2 w-0.5 h-3 rounded-sm" style={{ left: `calc(${designPct}% - 1px)`, backgroundColor: '#4587C9' }} title={`${t.design}: ${Math.round(designPct)}`} />
-                              <span className="absolute top-1/2 -translate-y-1/2 w-0.5 h-3 rounded-sm" style={{ left: `calc(${adoptionPct}% - 1px)`, backgroundColor: '#D1406C' }} title={`${t.adoption}: ${Math.round(adoptionPct)}`} />
+                              <span className="absolute" style={{ left: `calc(${designPct}% - 1px)`, top: '-2px', width: '2px', height: '9px', backgroundColor: '#4587C9', borderRadius: '2px' }} title={`${t.design}: ${Math.round(designPct)}`} />
+                              <span className="absolute" style={{ left: `calc(${adoptionPct}% - 1px)`, top: '-2px', width: '2px', height: '9px', backgroundColor: '#D1406C', borderRadius: '2px' }} title={`${t.adoption}: ${Math.round(adoptionPct)}`} />
                             </>
                           )}
                         </div>
-                        {hasDA && (
-                          <div className="flex items-center gap-4 mt-2">
-                            <span className="inline-flex items-center gap-1.5 text-xs text-ink/45">
-                              <span className="w-2 h-2 rounded-sm" style={{ backgroundColor: '#4587C9' }} />
-                              {t.design}: {Math.round(designPct)}
-                            </span>
-                            <span className="inline-flex items-center gap-1.5 text-xs text-ink/45">
-                              <span className="w-2 h-2 rounded-sm" style={{ backgroundColor: '#D1406C' }} />
-                              {t.adoption}: {Math.round(adoptionPct)}
-                            </span>
-                          </div>
-                        )}
-                        {ds.varianceFlag === 'High Variance' && <p className="text-xs font-medium mt-2" style={{ color: BRAND.orange }}>{t.highVariance}</p>}
                       </div>
                     )
                   })}
