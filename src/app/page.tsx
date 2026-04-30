@@ -81,10 +81,10 @@ function getRankColor(pos: number): { bg: string; text: string; border: string; 
   return [
     { bg: 'bg-teal-50/60', text: 'text-teal', border: 'border-teal/40', badge: 'bg-teal text-white' },
     { bg: 'bg-teal-50/30', text: 'text-teal/70', border: 'border-teal/20', badge: 'bg-teal/20 text-teal' },
-    { bg: 'bg-gray-50/50', text: 'text-ink/40', border: 'border-gray-200', badge: 'bg-gray-100 text-ink/40' },
+    { bg: 'bg-gray-50/50', text: 'text-ink/55', border: 'border-gray-200', badge: 'bg-gray-100 text-ink/55' },
     { bg: 'bg-purple-50/30', text: 'text-purple/60', border: 'border-purple/20', badge: 'bg-purple/15 text-purple/60' },
     { bg: 'bg-purple-50/60', text: 'text-purple', border: 'border-purple/40', badge: 'bg-purple text-white' },
-  ][pos] ?? { bg: 'bg-gray-50', text: 'text-ink/40', border: 'border-gray-200', badge: 'bg-gray-100 text-ink/40' }
+  ][pos] ?? { bg: 'bg-gray-50', text: 'text-ink/55', border: 'border-gray-200', badge: 'bg-gray-100 text-ink/55' }
 }
 
 // ── Drag-and-Drop Ranking ──
@@ -273,7 +273,7 @@ export default function ESDApp() {
           <div className="flex items-center gap-1.5">
             {(['en', 'fr'] as const).map(l => (
               <button key={l} onClick={() => setLang(l)}
-                className={`px-3 py-1 rounded-full text-xs font-semibold transition ${lang === l ? 'text-white' : 'text-ink/40 hover:text-ink/60'}`}
+                className={`px-3 py-1 rounded-full text-xs font-semibold transition ${lang === l ? 'text-white' : 'text-ink/55 hover:text-ink/60'}`}
                 style={lang === l ? { backgroundColor: BRAND.ink } : {}}>
                 {l.toUpperCase()}
               </button>
@@ -306,7 +306,7 @@ export default function ESDApp() {
                 style={{ backgroundColor: BRAND.purple }}>
                 {t.startButton}
               </button>
-              <p className="text-xs text-ink/35">19 questions</p>
+              <p className="text-xs text-ink/45">19 questions</p>
               {/* When to use cards */}
               <div className="grid grid-cols-3 gap-4 pt-4">
                 {[
@@ -318,7 +318,7 @@ export default function ESDApp() {
                       <svg width="12" height="12" viewBox="0 0 12 12" fill="white"><path d="M2 6L5 9L10 3" stroke="white" strokeWidth="2" fill="none"/></svg>
                     </div>
                     <p className="text-sm font-semibold" style={{ color: BRAND.ink }}>{lang === 'en' ? card.en : card.fr}</p>
-                    <p className="text-xs text-ink/40 leading-relaxed">{lang === 'en' ? card.enSub : card.frSub}</p>
+                    <p className="text-xs text-ink/55 leading-relaxed">{lang === 'en' ? card.enSub : card.frSub}</p>
                   </div>
                 ))}
               </div>
@@ -341,17 +341,17 @@ export default function ESDApp() {
             <h2 className="text-xl font-bold leading-relaxed" style={{ color: BRAND.ink }}>{currentQuestion.text[lang]}</h2>
             <div className="space-y-1">
               <p className="text-sm font-semibold text-ink/60 uppercase tracking-wide">{t.rankInstruction}</p>
-              {t.rankHint && <p className="text-xs text-ink/35">{t.rankHint}</p>}
+              {t.rankHint && <p className="text-xs text-ink/45">{t.rankHint}</p>}
             </div>
             <DragRankCards rankedIds={rankedIds} statements={currentQuestion.statements} lang={lang} t={t} onReorder={setRankedIds} />
             <div className="space-y-3 pt-2">
               <h3 className="text-sm font-semibold text-ink/60 uppercase tracking-wide">{t.contextLabel}</h3>
-              {t.contextHelper && <p className="text-xs text-ink/35 leading-relaxed">{t.contextHelper}</p>}
+              {t.contextHelper && <p className="text-xs text-ink/45 leading-relaxed">{t.contextHelper}</p>}
               <textarea value={contextText} onChange={(e) => setContextText(e.target.value)} placeholder={t.contextPlaceholder}
                 className="w-full h-28 rounded-xl border border-gray-200 p-4 text-sm text-ink resize-none focus:outline-none focus:ring-2 focus:ring-purple/30 bg-white" />
             </div>
             <div className="flex items-center justify-between pt-4">
-              <button onClick={handlePrev} disabled={questionIndex === 0} className="text-ink/40 hover:text-ink disabled:opacity-20 font-medium">{t.previous}</button>
+              <button onClick={handlePrev} disabled={questionIndex === 0} className="text-ink/55 hover:text-ink disabled:opacity-20 font-medium">{t.previous}</button>
               <button onClick={saveAndNext} className="rounded-xl px-8 py-3 font-semibold text-white hover:opacity-90 transition shadow-md" style={{ backgroundColor: BRAND.purple }}>
                 {questionIndex < QUESTIONS.length - 1 ? t.continueButton : t.seeResults}
               </button>
@@ -364,7 +364,7 @@ export default function ESDApp() {
           <div className="text-center space-y-6 py-32">
             <div className="w-12 h-12 mx-auto animate-spin"><img src="/icon.svg" alt="" className="w-full h-full" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} /></div>
             <h2 className="text-xl font-bold" style={{ color: BRAND.ink }}>{t.processingTitle}</h2>
-            <p className="text-ink/40 text-sm">{t.processingSubtitle}</p>
+            <p className="text-ink/55 text-sm">{t.processingSubtitle}</p>
           </div>
         )}
 
@@ -482,12 +482,12 @@ export default function ESDApp() {
                           <span style={{ fontSize: '11px', fontWeight: 600, color: rag.labelHex }}>{ragLabel}</span>
                         </div>
                         {/* Integrated dual-level progress bar */}
-                        <div className="relative w-full overflow-hidden" style={{ height: '5px', backgroundColor: 'rgba(255,255,255,0.65)', borderRadius: '99px' }}>
+                        <div className="relative w-full overflow-hidden" style={{ height: '7px', backgroundColor: 'rgba(255,255,255,0.65)', borderRadius: '99px' }}>
                           <div className="absolute top-0 left-0 h-full transition-all duration-700" style={{ width: `${fillPct}%`, backgroundColor: rag.barHex, borderRadius: '99px' }} />
                           {hasDA && (
                             <>
-                              <span className="absolute" style={{ left: `calc(${designPct}% - 1px)`, top: '-2px', width: '2px', height: '9px', backgroundColor: '#4587C9', borderRadius: '2px' }} title={`${t.design}: ${Math.round(designPct)}`} />
-                              <span className="absolute" style={{ left: `calc(${adoptionPct}% - 1px)`, top: '-2px', width: '2px', height: '9px', backgroundColor: '#D1406C', borderRadius: '2px' }} title={`${t.adoption}: ${Math.round(adoptionPct)}`} />
+                              <span className="absolute" style={{ left: `calc(${designPct}% - 1.5px)`, top: '-2px', width: '3px', height: '11px', backgroundColor: '#4587C9', borderRadius: '2px', boxShadow: '0 0 0 1px rgba(255,255,255,0.9)' }} title={`${t.design}: ${Math.round(designPct)}`} />
+                              <span className="absolute" style={{ left: `calc(${adoptionPct}% - 1.5px)`, top: '-2px', width: '3px', height: '11px', backgroundColor: '#D1406C', borderRadius: '2px', boxShadow: '0 0 0 1px rgba(255,255,255,0.9)' }} title={`${t.adoption}: ${Math.round(adoptionPct)}`} />
                             </>
                           )}
                         </div>
@@ -498,11 +498,11 @@ export default function ESDApp() {
                 {/* Design / Adoption legend */}
                 <div className="flex items-center" style={{ gap: '16px', marginTop: '12px' }}>
                   <span style={{ fontSize: '11px', color: '#6B7280', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ width: '2px', height: '9px', backgroundColor: '#4587C9', borderRadius: '2px' }} />
+                    <span style={{ width: '3px', height: '11px', backgroundColor: '#4587C9', borderRadius: '2px' }} />
                     {t.design}
                   </span>
                   <span style={{ fontSize: '11px', color: '#6B7280', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ width: '2px', height: '9px', backgroundColor: '#D1406C', borderRadius: '2px' }} />
+                    <span style={{ width: '3px', height: '11px', backgroundColor: '#D1406C', borderRadius: '2px' }} />
                     {t.adoption}
                   </span>
                 </div>
@@ -556,14 +556,14 @@ export default function ESDApp() {
 
             {/* Leadership Cascade Gap */}
             {results.cascadeGap !== null && (
-              <div className="rounded-xl border border-gray-200 bg-white p-6">
-                <h3 className="text-xs font-semibold text-ink/40 uppercase tracking-wide mb-4">{t.cascadeGap}</h3>
+              <div className="rounded-xl p-6" style={{ backgroundColor: '#F0F7FD', border: '2px solid #BFDBFE' }}>
+                <h3 className="text-xs font-semibold text-ink/55 uppercase tracking-wide mb-4">{t.cascadeGap}</h3>
                 <div className="flex items-center gap-6 mb-4">
-                  <div className="text-center"><p className="text-2xl font-bold" style={{ color: BRAND.ink }}>{Math.round(results.dimensionScores.flatMap(d => d.questionScores).find(q => q.questionId === 'Q11a')?.score ?? 0)}</p><p className="text-xs text-ink/35">{t.senior}</p></div>
+                  <div className="text-center"><p className="text-2xl font-bold" style={{ color: BRAND.ink }}>{Math.round(results.dimensionScores.flatMap(d => d.questionScores).find(q => q.questionId === 'Q11a')?.score ?? 0)}</p><p className="text-xs text-ink/45">{t.senior}</p></div>
                   <span className="text-xl text-ink/20">{'\u2192'}</span>
-                  <div className="text-center"><p className="text-2xl font-bold" style={{ color: BRAND.ink }}>{Math.round(results.dimensionScores.flatMap(d => d.questionScores).find(q => q.questionId === 'Q11b')?.score ?? 0)}</p><p className="text-xs text-ink/35">{t.nextLayer}</p></div>
+                  <div className="text-center"><p className="text-2xl font-bold" style={{ color: BRAND.ink }}>{Math.round(results.dimensionScores.flatMap(d => d.questionScores).find(q => q.questionId === 'Q11b')?.score ?? 0)}</p><p className="text-xs text-ink/45">{t.nextLayer}</p></div>
                   <span className="text-xl text-ink/20">=</span>
-                  <div className="text-center"><p className="text-2xl font-bold" style={{ color: Math.abs(results.cascadeGap) > 30 ? BRAND.orange : BRAND.ink }}>{Math.round(Math.abs(results.cascadeGap))}</p><p className="text-xs text-ink/35">{t.gap}</p></div>
+                  <div className="text-center"><p className="text-2xl font-bold" style={{ color: Math.abs(results.cascadeGap) > 30 ? BRAND.orange : BRAND.ink }}>{Math.round(Math.abs(results.cascadeGap))}</p><p className="text-xs text-ink/45">{t.gap}</p></div>
                 </div>
                 <p className="text-sm text-ink/50 leading-relaxed">{getCascadeText()}</p>
               </div>
@@ -579,12 +579,12 @@ export default function ESDApp() {
         {step === 'report' && (
           <div className="max-w-4xl mx-auto py-12 space-y-8">
             <div className="flex items-center justify-between">
-              <button onClick={() => setStep('dashboard')} className="text-ink/40 hover:text-ink font-medium text-sm">{t.backToDashboard}</button>
-              <button onClick={() => { setStep('landing'); setResponses([]); setResults(null); setReportText(''); setQuestionIndex(0) }} className="text-ink/40 hover:text-ink font-medium text-sm">{t.restartDiagnostic}</button>
+              <button onClick={() => setStep('dashboard')} className="text-ink/55 hover:text-ink font-medium text-sm">{t.backToDashboard}</button>
+              <button onClick={() => { setStep('landing'); setResponses([]); setResults(null); setReportText(''); setQuestionIndex(0) }} className="text-ink/55 hover:text-ink font-medium text-sm">{t.restartDiagnostic}</button>
             </div>
             <h1 className="text-2xl font-bold" style={{ color: BRAND.ink }}>{t.reportTitle}</h1>
             {isStreaming && reportText.length === 0 && (
-              <div className="flex items-center gap-3 text-ink/40 text-sm">
+              <div className="flex items-center gap-3 text-ink/55 text-sm">
                 <div className="w-4 h-4 animate-spin"><img src="/icon.svg" alt="" className="w-full h-full" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} /></div>
                 <span>{t.generatingReport}</span>
               </div>
