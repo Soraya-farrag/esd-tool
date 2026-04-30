@@ -13,7 +13,7 @@ export const DIMENSIONS: Dimension[] = [
   system: 'Structural',
   weight: 0.15,
   hasDesignAdoption: true,
-  description: { en: `Clarity of decision ownership, consultation, escalation, and governance speed.`, fr: `Clarté de la propriété des décisions, consultation, escalade et rapidité de gouvernance.` },
+  description: { en: `Who decides what, with what clarity and speed.`, fr: `Qui d\u00e9cide quoi, avec quelle clart\u00e9 et quelle rapidit\u00e9.` },
  },
  {
   id: 'D2' as DimensionId,
@@ -21,7 +21,7 @@ export const DIMENSIONS: Dimension[] = [
   system: 'Structural',
   weight: 0.1,
   hasDesignAdoption: true,
-  description: { en: `Fit between structure and strategy. Whether interfaces exist AND function.`, fr: `Adéquation entre structure et stratégie. Si les interfaces existent ET fonctionnent.` },
+  description: { en: `Whether structure and responsibilities enable the strategy.`, fr: `Si la structure et les responsabilit\u00e9s permettent la strat\u00e9gie.` },
  },
  {
   id: 'D3' as DimensionId,
@@ -29,7 +29,7 @@ export const DIMENSIONS: Dimension[] = [
   system: 'Structural',
   weight: 0.15,
   hasDesignAdoption: true,
-  description: { en: `Accountability for coordination, predictability of cross-team working.`, fr: `Responsabilité de la coordination, prévisibilité du travail inter-équipes.` },
+  description: { en: `Ability of teams to work together in an aligned way.`, fr: `Capacit\u00e9 des \u00e9quipes \u00e0 travailler ensemble de mani\u00e8re align\u00e9e.` },
  },
  {
   id: 'D4' as DimensionId,
@@ -37,7 +37,7 @@ export const DIMENSIONS: Dimension[] = [
   system: 'Structural',
   weight: 0.12,
   hasDesignAdoption: true,
-  description: { en: `Goal quality, dependency management, roadmap sequencing.`, fr: `Qualité des objectifs, gestion des dépendances, séquencement de la feuille de route.` },
+  description: { en: `Quality, alignment and coherence of objectives at all levels.`, fr: `Qualit\u00e9, alignement et coh\u00e9rence des objectifs \u00e0 tous les niveaux.` },
  },
  {
   id: 'D5' as DimensionId,
@@ -45,7 +45,7 @@ export const DIMENSIONS: Dimension[] = [
   system: 'Structural',
   weight: 0.1,
   hasDesignAdoption: true,
-  description: { en: `Line of sight, reporting coherence, signal detection, adaptive capacity.`, fr: `Visibilité claire, cohérence du reporting, détection des signaux, capacité d'adaptation.` },
+  description: { en: `Ability to track execution, detect gaps and adjust quickly.`, fr: `Capacit\u00e9 \u00e0 suivre l\u2019ex\u00e9cution, d\u00e9tecter les \u00e9carts et ajuster rapidement.` },
  },
  {
   id: 'D6' as DimensionId,
@@ -53,7 +53,7 @@ export const DIMENSIONS: Dimension[] = [
   system: 'Social',
   weight: 0.18,
   hasDesignAdoption: false,
-  description: { en: `Senior team cohesion, cascade, diagnostic capability, social capital, capability-strategy fit.`, fr: `Cohésion de l'équipe dirigeante, cascade, capacité diagnostique, capital social, adéquation capacités-stratégie.` },
+  description: { en: `Cohesion and ability of leaders to drive strategy together.`, fr: `Coh\u00e9sion et capacit\u00e9 des leaders \u00e0 porter la strat\u00e9gie ensemble.` },
  },
  {
   id: 'D7' as DimensionId,
@@ -61,7 +61,7 @@ export const DIMENSIONS: Dimension[] = [
   system: 'Social',
   weight: 0.1,
   hasDesignAdoption: false,
-  description: { en: `Strategy translation, information flow upward and lateral.`, fr: `Traduction de la stratégie, flux d'information ascendant et latéral.` },
+  description: { en: `Ability to understand strategy and circulate useful information.`, fr: `Capacit\u00e9 \u00e0 comprendre la strat\u00e9gie et \u00e0 faire circuler l\u2019information utile.` },
  },
  {
   id: 'D8' as DimensionId,
@@ -69,7 +69,7 @@ export const DIMENSIONS: Dimension[] = [
   system: 'Social',
   weight: 0.1,
   hasDesignAdoption: false,
-  description: { en: `Ownership depth, involvement quality, incentive alignment.`, fr: `Profondeur de l'appropriation, qualité de l'implication, alignement des incitations.` },
+  description: { en: `Level of ownership and alignment of motivations and rewards.`, fr: `Niveau d\u2019appropriation et alignement des motivations et r\u00e9compenses.` },
  },
 ]
 

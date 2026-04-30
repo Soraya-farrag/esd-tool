@@ -464,18 +464,17 @@ export default function ESDApp() {
                   {results.dimensionScores.map(ds => {
                     const dim = DIMENSIONS.find(d => d.id === ds.dimensionId); if (!dim) return null
                     const rag = getDimRAG(ds.score)
-                    const hasDA = dim.hasDesignAdoption && ds.designScore !== undefined && ds.adoptionScore !== undefined
-                    const designPct = hasDA ? Math.max(0, Math.min(100, ds.designScore!)) : 0
-                    const adoptionPct = hasDA ? Math.max(0, Math.min(100, ds.adoptionScore!)) : 0
-                    const fillPct = hasDA ? Math.min(designPct, adoptionPct) : Math.max(0, Math.min(100, ds.score))
+                    const fillPct = Math.max(0, Math.min(100, ds.score))
                     const ragLabel = lang === 'en' ? rag.label : getDimRAGFr(ds.score)
                     return (
                       <div key={ds.dimensionId} style={{ border: `2px solid ${rag.borderHex}`, backgroundColor: rag.bgHex, borderRadius: '12px', padding: '14px' }}>
                         {/* Top row: name + dot */}
-                        <div className="flex items-center justify-between" style={{ marginBottom: '8px' }}>
+                        <div className="flex items-center justify-between" style={{ marginBottom: '4px' }}>
                           <p style={{ fontSize: '11px', fontWeight: 600, color: '#4B5563', paddingRight: '8px' }}>{dim.name[lang]}</p>
                           <span style={{ width: '8px', height: '8px', borderRadius: '999px', backgroundColor: rag.dotHex, flexShrink: 0 }} />
                         </div>
+                        {/* Definition */}
+                        <p style={{ fontSize: '10px', fontWeight: 400, color: '#374151', lineHeight: 1.4, marginBottom: '8px' }}>{dim.description[lang]}</p>
                         {/* Middle row: score + RAG label */}
                         <div className="flex items-end justify-between" style={{ marginBottom: '8px' }}>
                           <span style={{ fontSize: '28px', fontWeight: 800, color: '#151D33', lineHeight: 1 }}>{Math.round(ds.score)}</span>
@@ -484,27 +483,10 @@ export default function ESDApp() {
                         {/* Integrated dual-level progress bar */}
                         <div className="relative w-full overflow-hidden" style={{ height: '7px', backgroundColor: 'rgba(255,255,255,0.65)', borderRadius: '99px' }}>
                           <div className="absolute top-0 left-0 h-full transition-all duration-700" style={{ width: `${fillPct}%`, backgroundColor: rag.barHex, borderRadius: '99px' }} />
-                          {hasDA && (
-                            <>
-                              <span className="absolute" style={{ left: `calc(${designPct}% - 1.5px)`, top: '-2px', width: '3px', height: '11px', backgroundColor: '#151D33', borderRadius: '2px', boxShadow: '0 0 0 1px rgba(255,255,255,0.9)' }} title={`${t.design}: ${Math.round(designPct)}`} />
-                              <span className="absolute" style={{ left: `calc(${adoptionPct}% - 1.5px)`, top: '-2px', width: '3px', height: '11px', backgroundColor: '#7C3AED', borderRadius: '2px', boxShadow: '0 0 0 1px rgba(255,255,255,0.9)' }} title={`${t.adoption}: ${Math.round(adoptionPct)}`} />
-                            </>
-                          )}
                         </div>
                       </div>
                     )
                   })}
-                </div>
-                {/* Design / Adoption legend */}
-                <div className="flex items-center" style={{ gap: '16px', marginTop: '12px' }}>
-                  <span style={{ fontSize: '11px', color: '#4B5563', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ width: '3px', height: '11px', backgroundColor: '#151D33', borderRadius: '2px' }} />
-                    {t.design}
-                  </span>
-                  <span style={{ fontSize: '11px', color: '#4B5563', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ width: '3px', height: '11px', backgroundColor: '#7C3AED', borderRadius: '2px' }} />
-                    {t.adoption}
-                  </span>
                 </div>
             </div>
 
@@ -515,7 +497,7 @@ export default function ESDApp() {
                   <span style={{ color: BRAND.rose }}>{'\u26a0'}</span>
                   {t.topStructuralTension}
                 </h3>
-                <div className="rounded-xl border-2 border-rose bg-rose-50 p-6 shadow-sm">
+                <div className="rounded-xl p-6 shadow-sm" style={{ backgroundColor: '#F0F7FD', border: '2px solid #BFDBFE' }}>
                   {getTopPatterns(1).length === 0 ? <p className="text-sm text-ink/50 italic">{t.noneDetected}</p> : (() => {
                     const p = getTopPatterns(1)[0]
                     const pat = PATTERNS[p.patternId]
@@ -523,7 +505,7 @@ export default function ESDApp() {
                     const sevLabel = pat.severity === 'High' ? t.severityHigh : pat.severity === 'Medium-High' ? t.severityMediumHigh : t.severityMedium
                     return (
                       <>
-                        <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: BRAND.rose }}>{sevLabel}</p>
+                        <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#4587C9' }}>{sevLabel}</p>
                         <p className="text-base font-bold mb-2" style={{ color: BRAND.ink }}>{pat.name[lang]}</p>
                         <p className="text-sm text-ink/70 leading-relaxed">{pat.interpretation[lang]}</p>
                       </>
@@ -536,7 +518,7 @@ export default function ESDApp() {
                   <span style={{ color: BRAND.orange }}>{'\u26a0'}</span>
                   {t.topExecutionRisk}
                 </h3>
-                <div className="rounded-xl border-2 border-orange bg-orange-50 p-6 shadow-sm">
+                <div className="rounded-xl p-6 shadow-sm" style={{ backgroundColor: '#F0F7FD', border: '2px solid #BFDBFE' }}>
                   {getTopFailureModes(1).length === 0 ? <p className="text-sm text-ink/50 italic">{t.noneDetected}</p> : (() => {
                     const f = getTopFailureModes(1)[0]
                     const fm = FAILURE_MODES[f.failureModeId]
@@ -544,7 +526,7 @@ export default function ESDApp() {
                     const sevLabel = fm.severity === 'High' ? t.severityHigh : fm.severity === 'Medium-High' ? t.severityMediumHigh : t.severityMedium
                     return (
                       <>
-                        <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: BRAND.orange }}>{sevLabel}</p>
+                        <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: '#4587C9' }}>{sevLabel}</p>
                         <p className="text-base font-bold mb-2" style={{ color: BRAND.ink }}>{fm.name[lang]}</p>
                         <p className="text-sm text-ink/70 leading-relaxed">{fm.description[lang]}</p>
                       </>
