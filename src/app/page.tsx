@@ -392,7 +392,7 @@ export default function ESDApp() {
                   <div className="relative flex items-center" style={{ gap: '28px' }}>
                     <ScoreGauge score={results.overallScore} band={results.overallBand} />
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold uppercase" style={{ fontSize: '9px', letterSpacing: '1.8px', color: arcColor, marginBottom: '6px' }}>{t.overallScore}</p>
+                      <p className="font-semibold uppercase" style={{ fontSize: '13px', letterSpacing: '1.8px', color: arcColor, marginBottom: '6px' }}>{t.overallScore}</p>
                       <h2 className="text-white font-bold" style={{ fontSize: '22px', letterSpacing: '-0.4px', marginBottom: dimsRequiringDesignAttention > 0 ? '10px' : 0, lineHeight: 1.15 }}>{getBandLabel(results.overallBand, lang)}</h2>
                       {dimsRequiringDesignAttention > 0 && (
                         <p style={{ fontSize: '13px', lineHeight: 1.4 }}>
@@ -494,7 +494,7 @@ export default function ESDApp() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <h3 className="flex items-center gap-2 text-sm font-semibold mb-3" style={{ color: BRAND.ink }}>
-                  <span style={{ color: BRAND.rose }}>{'\u26a0'}</span>
+                  <span style={{ color: '#4587C9' }}>{'\u26a0'}</span>
                   {t.topStructuralTension}
                 </h3>
                 <div className="rounded-xl p-6 shadow-sm" style={{ backgroundColor: '#F0F7FD', border: '2px solid #BFDBFE' }}>
@@ -515,7 +515,7 @@ export default function ESDApp() {
               </div>
               <div>
                 <h3 className="flex items-center gap-2 text-sm font-semibold mb-3" style={{ color: BRAND.ink }}>
-                  <span style={{ color: BRAND.orange }}>{'\u26a0'}</span>
+                  <span style={{ color: '#4587C9' }}>{'\u26a0'}</span>
                   {t.topExecutionRisk}
                 </h3>
                 <div className="rounded-xl p-6 shadow-sm" style={{ backgroundColor: '#F0F7FD', border: '2px solid #BFDBFE' }}>
